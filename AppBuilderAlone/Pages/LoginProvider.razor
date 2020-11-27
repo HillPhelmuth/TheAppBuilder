@@ -1,0 +1,40 @@
+﻿@page "/login-providers"
+@*@{
+        var providers = new Dictionary<string, string>
+    {
+            { "github", "GitHub" },
+            { "twitter", "Twitter" },
+            { "facebook", "Facebook" },
+            {"google", "Google"}
+        };
+    }*@
+
+<MatH2 Class="text-center">Login</MatH2>
+
+<div style="max-width: 600px; margin-left:auto; margin-right:auto">
+    <MatList>
+        @foreach (var provider in providers)
+        {
+            string href = $"/.auth/login/{provider.Key}";
+            <MatListItem>
+                <div class="mat-elevation-z22" style="width: 100%; margin:5px">
+                    <a class="btn btn-block btn-lg btn-social btn-@provider.Key" href="@href">
+                        <span class="fa fa-@provider.Key"></span> Sign in with @provider.Value
+                    </a>
+                </div>
+            </MatListItem>
+        }
+    </MatList>
+</div>
+@code {
+
+    private readonly Dictionary<string, string> providers = new Dictionary<string, string>
+    {
+        { "github", "GitHub" },
+        { "twitter", "Twitter" },
+        { "facebook", "Facebook" },
+        {"google", "Google"}
+    };
+
+
+}
