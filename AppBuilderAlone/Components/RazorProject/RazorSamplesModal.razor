@@ -1,0 +1,6 @@
+﻿<div>
+    @*@foreach (var codeSamplePair in CodeSnippets.RazorSnippets)
+    {
+        <MatButton OnClick="@(() => UpdateActiveFile(codeSamplePair))">@codeSamplePair.Key</MatButton>
+    }*@
+</div>

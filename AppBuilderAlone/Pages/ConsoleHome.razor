@@ -1,0 +1,25 @@
+﻿@page "/console"
+<div class="mat-layout-grid">
+    <div class="mat-layout-grid-inner">
+        <div class="mat-layout-grid-cell mat-layout-grid-cell-span-12">
+            <MatButtonLink Href="/">Home</MatButtonLink>
+            <div style="float:right">
+                <MatTextField Label="Change File Name" @bind-Value="fileName"></MatTextField>
+                <MatButton OnClick="UpdateName">Update</MatButton>
+            </div>
+        </div>
+        <div class="mat-layout-grid-cell mat-layout-grid-cell-span-7">
+            @if (isCodeCompiling)
+            {
+                <hr />
+                <MatH4 Class="text-center" Style="color: blue">Executing...</MatH4>
+                <SpinKitFadingCircle />
+                <hr />
+            }
+            <Editor ButtonLabel="Compile and Run" CodeSnippet="@AppState.CodeSnippet" Language="@AppState.Language" OnCodeSubmit="HandleCodeSubmit"/>
+        </div>
+        <div id="user-console-window-container" class="mat-layout-grid-cell mat-layout-grid-cell-span-5">
+            <pre>@AppState.CurrentOutput</pre>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,113 @@
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Runtime;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.CodeAnalysis;
+using Microsoft.JSInterop;
+
+namespace CompileRazor
+{
+    public interface IRazorDependencyResolver
+    {
+        Task<List<MetadataReference>> GetAssemblies();
+    }
+
+    public class RazorDependencyResolver : IRazorDependencyResolver
+    {
+        private readonly HttpClient _http;
+
+        public RazorDependencyResolver(HttpClient http)
+        {
+            _http = http;
+        }
+
+        public async Task<List<MetadataReference>> GetAssemblies()
+        {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(x => !x.IsDynamic)
+                .Select(x => x.GetName().Name)
+                .Union(new[]
+                {
+                // Add any required dll that are not referenced in the Blazor application
+                "System.Console",
+                    "System.Linq","System.Collection.Generics"
+                    //""
+                })
+                .Distinct()
+                .Select(x => $"_framework/{x}.dll");
+
+            var references = new List<MetadataReference>();
+
+            foreach (var assembly in assemblies)
+            {
+                // Download the assembly
+                references.Add(
+                    MetadataReference.CreateFromStream(
+                        await _http.GetStreamAsync(assembly)));
+            }
+
+            return references;
+        }
+        public static async Task<List<MetadataReference>> InitAsync(HttpClient httpClient)
+        {
+            var basicReferenceAssemblyRoots = new[]
+            {
+                typeof(AssemblyTargetedPatchBandAttribute).Assembly, // System.Runtime
+                typeof(NavLink).Assembly, // Microsoft.AspNetCore.Components.Web
+                typeof(IQueryable).Assembly, // System.Linq
+                typeof(HttpClientJsonExtensions).Assembly, // System.Net.Http.Json
+                typeof(HttpClient).Assembly, // System.Net.Http
+                typeof(Uri).Assembly, // System.Private.Uri
+                typeof(IJSRuntime).Assembly, // Microsoft.JSInterop
+                typeof(RequiredAttribute).Assembly, // System.ComponentModel.Annotations
+            };
+
+            var assemblyNames = basicReferenceAssemblyRoots
+                .SelectMany(assembly => assembly.GetReferencedAssemblies().Concat(new[] { assembly.GetName() }))
+                .Select(x => x.Name)
+                .Distinct()
+                .Select(x => $"_framework/{x}.dll")
+                .ToList();
+
+            var assemblyStreams = await GetAssemblyStreams(httpClient, assemblyNames);
+
+            Dictionary<string, PortableExecutableReference> allReferenceAssemblies = assemblyStreams.ToDictionary(a => a.Key, a => MetadataReference.CreateFromStream(a.Value));
+
+            return allReferenceAssemblies
+                .Where(a => basicReferenceAssemblyRoots
+                    .Select(x => x.GetName().Name)
+                    .Union(basicReferenceAssemblyRoots.SelectMany(y => y.GetReferencedAssemblies().Select(z => z.Name)))
+                    .Any(n=> n == a.Key))
+                .Select(a => a.Value)
+                .ToList();
+            //baseCompilation = CSharpCompilation.Create(
+            //    "BlazorApp.OutputRCL",
+            //    Array.Empty<SyntaxTree>(),
+            //    basicReferenceAssemblies,
+            //    new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        }
+        private static async Task<IDictionary<string, Stream>> GetAssemblyStreams(HttpClient httpClient, IEnumerable<string> assemblyNames)
+        {
+            var streams = new ConcurrentDictionary<string, Stream>();
+
+            await Task.WhenAll(
+                assemblyNames.Select(async assemblyName =>
+                {
+                    var result = await httpClient.GetAsync($"{assemblyName}");
+
+                    result.EnsureSuccessStatusCode();
+
+                    streams.TryAdd(assemblyName, await result.Content.ReadAsStreamAsync());
+                }));
+
+            return streams;
+        }
+    }
+}

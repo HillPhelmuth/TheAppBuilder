@@ -1,0 +1,28 @@
+﻿<EditForm Model="FormModel" OnValidSubmit="Submit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <MatH5>Provide the Github repo path to retrieve any public file.</MatH5>
+    <p>NOTE: Don't include the '/' between url sections. We'll handle that. However, if the target file is not in the root directory of the repo, it will required a '/' between the folders and file. The full GitHub api Url will build below</p>
+    <p>github user or organization:</p>
+    <div class="mat-layout-grid" style="max-width: 900px;">
+        <div class="mat-layout-grid-inner">
+            <div class="mat-layout-grid-cell mat-layout-grid-cell-span-4">
+                <p>Github User or Organization</p>
+                <MatTextField Style="width:90%" TValue="string" @bind-Value="FormModel.GithubName" Label="github user or organization"></MatTextField><span style="font-size:1.5rem">/</span>
+            </div>
+            <div class="mat-layout-grid-cell mat-layout-grid-cell-span-4">
+                <p>Repository name:</p>
+                <MatTextField Style="width:90%" TValue="string" @bind-Value="FormModel.RepoName" Label="Repo name"></MatTextField><span style="font-size:1.5rem">/</span>
+            </div>
+            <div class="mat-layout-grid-cell mat-layout-grid-cell-span-4">
+                <p>Filepath (including FileName)</p>
+                <MatTextField Style="width:95%" TValue="string" @bind-Value="FormModel.FilePath" Label="Path" PlaceHolder="Folder/SubFolder/File.cs"></MatTextField>
+            </div>
+           
+        </div>
+    </div>
+    <br/> <hr /><br />
+    <MatH5>GitHub Api Url:</MatH5>
+    <div style="margin-bottom:1.5em">https://api.github.com/repos/@FormModel.GithubName/@FormModel.RepoName/contents/@FormModel.FilePath</div>
+    <MatButton Type="submit" Raised="true">Pull in code file contents</MatButton>
+</EditForm>

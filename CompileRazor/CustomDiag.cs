@@ -1,36 +1,35 @@
 ﻿using System.IO;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.CodeAnalysis;
 
-namespace CompileRazor
+namespace AppBuilder.CompileRazor
 {
     public class CustomDiag
     {
         [JsonConstructor]
         public CustomDiag()
         {
-
         }
         public CustomDiag(Diagnostic diagnostic)
         {
             var mappedLineSpan = diagnostic.Location.GetMappedLineSpan();
             var file = Path.GetFileName(mappedLineSpan.Path);
             var line = mappedLineSpan.StartLinePosition.Line;
-            
+
 
             Code = diagnostic.Descriptor.Id;
             Severity = diagnostic.Severity;
             Description = diagnostic.GetMessage();
             File = file;
             Line = line;
-           
 
         }
 
         public CustomDiag(RazorDiagnostic diagnostic)
         {
             Code = diagnostic.Id;
-            Severity = (DiagnosticSeverity) diagnostic.Severity;
+            Severity = (DiagnosticSeverity)diagnostic.Severity;
             Description = diagnostic.GetMessage();
             File = Path.GetFileName(diagnostic.Span.FilePath);
             Line = -1;
@@ -50,8 +49,6 @@ namespace CompileRazor
         {
             var line = Line >= 0 ? Line.ToString() : "Razor is hard...";
             return $"Code: {Code} Severity: {Severity} Description: {Description} Location: {File} at line {line}";
-           
         }
-
     }
 }

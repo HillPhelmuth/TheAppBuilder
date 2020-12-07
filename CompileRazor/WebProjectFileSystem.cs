@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Razor.Language;
 
-namespace CompileRazor
+namespace AppBuilder.CompileRazor
 {
     public class WebRazorProjectFileSystem : RazorProjectFileSystem
     {

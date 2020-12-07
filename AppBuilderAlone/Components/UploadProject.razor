@@ -1,0 +1,22 @@
+﻿@inject ZipService ZipService
+    <div class="drag-drop-zone">
+        <MatH6>Upload Project Zip</MatH6>
+        <InputFile OnChange="OnInputFileChange" accept=".zip" />
+    </div>
+
+    @code {
+
+        [CascadingParameter(Name = "AppState")]
+        public AppState AppState { get; set; }
+        [Parameter]
+        public EventCallback<List<ProjectFile>> OnProjectFileUpload { get; set; }
+
+        private async Task OnInputFileChange(InputFileChangeEventArgs e)
+        {
+            var bufferSize = 50 * 1024 * 1024;
+            await using var stream = e.File.OpenReadStream(bufferSize);
+            var projectFiles = await ZipService.ExtractFiles(stream);
+            await OnProjectFileUpload.InvokeAsync(projectFiles);
+        }
+
+    }

@@ -2,7 +2,7 @@
 using System.IO;
 using Microsoft.AspNetCore.Razor.Language;
 
-namespace CompileRazor
+namespace AppBuilder.CompileRazor
 {
     internal class NotFoundProjectItem : RazorProjectItem
     {

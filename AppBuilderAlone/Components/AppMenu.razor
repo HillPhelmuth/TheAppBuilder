@@ -1,0 +1,30 @@
+﻿<MatH3>Menu</MatH3>
+<MatList>
+    <MatListItem>
+        <MatButton Raised="true" OnClick="CreateProject">Create New Project</MatButton>
+    </MatListItem>
+    <MatDivider></MatDivider>
+    <MatListItem>
+        <MatButton Raised="true" OnClick="CreateFile">Create New File</MatButton>
+    </MatListItem>
+    <MatDivider></MatDivider>
+    <MatListItem>
+        <MatButton Raised="true" OnClick="LoadSampleProject">Load Sample Project</MatButton>
+    </MatListItem>
+    <MatDivider></MatDivider>
+    <MatListItem>
+        <MatButton Raised="true" OnClick="SelectActiveFile">Select Project File</MatButton>
+    </MatListItem>
+    <MatDivider></MatDivider>
+    <MatListItem>
+        <MatButton Raised="true" OnClick="UpdateFromPublicRepo">Load From Public Github Repo</MatButton>
+    </MatListItem>
+    <MatDivider></MatDivider>
+    <MatListItem>
+        <MatButton Raised="true" OnClick="DownloadProjectAsZip">Download Project Zip</MatButton>
+    </MatListItem>
+    <MatDivider></MatDivider>
+    <MatListItem>
+        <UploadProject OnProjectFileUpload="HandleProjectUpload"/>
+    </MatListItem>
+</MatList>

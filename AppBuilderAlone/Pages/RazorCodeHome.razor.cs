@@ -1,95 +1,155 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using BlazorMonaco;
-using BlazorMonaco.Bridge;
+using AppBuilder.Client.Components;
+using AppBuilder.Client.Components.RazorProject;
+using AppBuilder.Client.ExtensionMethods;
+using AppBuilder.Client.Services;
+using AppBuilder.CompileRazor;
+using AppBuilder.Shared;
+using Blazor.ModalDialog;
 using Microsoft.AspNetCore.Components;
-using Shared;
+using Microsoft.JSInterop;
 
-namespace AppBuilderAlone.Pages
+//using Newtonsoft.Json;
+
+namespace AppBuilder.Client.Pages
 {
-    public partial class RazorCodeHome
+    public partial class RazorCodeHome : IDisposable
     {
+        //[Inject]
+        //public AppState AppState { get; set; }
+        //[Inject]
+        //public PublicClient PublicClient { get; set; }
         [Inject]
-        private AppState AppState { get; set; }
+        public AppState AppState { get; set; }
+        [Inject]
+        public IJSRuntime JsRuntime { get; set; }
+        [Inject]
+        public RazorCompile RazorCompile { get; set; }
+        [Inject]
+        protected IModalDialogService ModalService { get; set; }
+        private RazorInterop RazorInterop => new RazorInterop(JsRuntime);
 
-        #region Monaco Editor
+        //private const string MainComponentCodePrefix = "@page \"/__razorOutput\"\n";
+        //private const string MainUserPagePath = "/__razorOutput";
+        public const string MainComponentFilePath = "__RazorOutput.razor";
+        public List<ProjectFile> Files { get; set; } = new List<ProjectFile>();
+        private DotNetObjectReference<RazorCodeHome> dotNetInstance;
+        private string language = "razor";
+        private bool isready;
+        private static string sampleSnippet = CodeSnippets.RazorSnippet;
 
-        protected StandaloneEditorConstructionOptions EditorOptionsRoslyn(MonacoEditor editor)
+        private List<string> Diagnostics { get; set; } = new List<string>();
+        private bool isCodeCompiling;
+        private bool isCSharp;
+        private string buttonCss = "";
+        protected override async Task OnInitializedAsync()
         {
-            return new StandaloneEditorConstructionOptions
+            AppState.CodeSnippet = sampleSnippet;
+            var mainCodeFile = new ProjectFile { Name = MainComponentFilePath, Content = sampleSnippet, FileType = FileType.Razor };
+            AppState.ActiveProjectFile = mainCodeFile;
+            //CodeEditorService.SaveCode(mainCodeFile);
+            AppState.PropertyChanged += HandleCodePropertyChanged;
+            await Task.Delay(50);
+            await RazorCompile.InitAsync();
+            isready = true;
+            await base.OnInitializedAsync();
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
             {
-                AutomaticLayout = true,
-                AutoIndent = true,
-                //HighlightActiveIndentGuide = true,
-                ColorDecorators = true,
-                Minimap = new MinimapOptions { Enabled = false },
-                Hover = new HoverOptions { Delay = 400 },
-                Find = new FindOptions { AutoFindInSelection = true, SeedSearchStringFromSelection = true, AddExtraSpaceOnTop = true },
-                Lightbulb = new LightbulbOptions { Enabled = true },
-                AcceptSuggestionOnEnter = "smart",
-                Language = Language,
-                Value = AppState.CodeSnippet ?? "private string MyProgram() \n" +
-                        "{\n" +
-                        "    string input = \"this does not\"; \n" +
-                        "    string modify = input + \" suck!\"; \n" +
-                        "    return modify;\n" +
-                        "}\n" +
-                        "return MyProgram();"
+                AppState.CodeSnippet = sampleSnippet;
+                dotNetInstance = DotNetObjectReference.Create(this);
+                await RazorInterop.RazorAppInit(dotNetInstance);
+            }
+            await base.OnAfterRenderAsync(firstRender);
+        }
+
+        private void HandleSaveToProject(string content)
+        {
+            AppState.ActiveProjectFile.Content = content;
+            var currentFile = AppState.ActiveProjectFile;
+            currentFile.Content = content;
+            AppState.SaveCode(currentFile);
+            if (!AppState.HasActiveProject) return;
+
+            AppState.ActiveProject.Files = AppState.ProjectFiles;
+        }
+
+        private void StartExecute()
+        {
+            isCodeCompiling = true;
+            StateHasChanged();
+            _ = ExecuteProject();
+        }
+        protected async Task ExecuteProject()
+        {
+            await Task.Delay(50);
+            Diagnostics = new List<string>();
+            CodeAssemblyModel compilationResult = null;
+            ProjectFile mainComponent = null;
+            string originalMainComponentContent = null;
+            originalMainComponentContent = AppState.ProjectFiles
+                .FirstOrDefault(x => x.Name == RazorConstants.DefaultComponentName)
+                ?.Content ?? RazorConstants.DefaultFileContent;
+            var codeFiles = AppState.ProjectFiles.PagifyMainComponent();
+
+            compilationResult = await RazorCompile.CompileToAssemblyAsync(codeFiles);
+            Diagnostics.AddRange(compilationResult?.Diagnostics?.Select(x => x.ToString()) ?? new List<string> { "None" });
+            buttonCss = Diagnostics.Any() ? "alert_output" : "";
+            if (compilationResult?.AssemblyBytes?.Length > 0)
+                await RazorInterop.RazorCacheAndDisplay(compilationResult.AssemblyBytes);
+
+            isCodeCompiling = false;
+            AppState.ProjectFiles = codeFiles.UnPagifyMainComponent(originalMainComponentContent);
+            await InvokeAsync(StateHasChanged);
+        }
+        protected async Task UpdateFromPublicRepo()
+        {
+            var option = new ModalDialogOptions
+            {
+                Style = "modal-dialog-githubform"
             };
+            var result = await ModalService.ShowDialogAsync<GitHubForm>("Get code from a public Github Repo", option);
+            if (!result.Success) return;
+            string code = result.ReturnParameters.Get<string>("FileCode");
+            AppState.CodeSnippet = code;
         }
-        protected MonacoEditor Editor { get; set; }
-        protected async Task EditorOnDidInit(MonacoEditorBase editor)
+        private void HandleCodePropertyChanged(object sender, PropertyChangedEventArgs args)
         {
-            await Editor.AddCommand((int)KeyMode.CtrlCmd | (int)KeyCode.KEY_H, (editor, keyCode) =>
+            if (args.PropertyName != "ActiveCodeFile" && args.PropertyName != "ActiveProject") return;
+            AppState.CodeSnippet = AppState.ActiveProjectFile.Content;
+            AppState.ProjectFiles = AppState.ActiveProject.Files;
+            StateHasChanged();
+        }
+
+        private async Task ShowDiags()
+        {
+            buttonCss = "";
+            var asMarkups = Diagnostics.Select(diagnostic => $"<li>{diagnostic}</li>");
+            var content = $"<ol>{string.Join(' ', asMarkups)}</ol>";
+            var parameters = new ModalDialogParameters
             {
-                Console.WriteLine("Ctrl+H : Initial editor command is triggered.");
-            });
-            await Editor.AddAction("saveAction", "Save Snippet", new int[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_D, (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_S }, null, null, "navigation", 1.5, async (editor, keyCodes) =>
-            {
-                //await AddSnippetToUser();
-                Console.WriteLine("Ctrl+D : Editor action is triggered.");
-            });
-            await Editor.AddAction("executeAction", "Execute Code",
-                new int[] { (int)KeyMode.CtrlCmd | (int)KeyCode.Enter }, null, null, "navigation", 2.5,
-                async (editor, keyCodes) =>
-                {
-                    //await SubmitCode();
-                    Console.WriteLine("Code Executed from Editor Command");
-                });
-            await Editor.SetValue(AppState.CodeSnippet);
-            var newDecorations = new[]
-            {
-                new ModelDeltaDecoration
-                {
-                    Range = new BlazorMonaco.Bridge.Range(3,1,3,1),
-                    Options = new ModelDecorationOptions
-                    {
-                        IsWholeLine = false,
-                        ClassName = "decorationContentClass",
-                        GlyphMarginClassName = "decorationGlyphMarginClass"
-                    }
-                }
+                {"CodeOutput", content}
             };
-
-            decorationIds = await Editor.DeltaDecorations(null, newDecorations);
+            await ModalService.ShowDialogAsync<CodeOutModal>("Current diagnostics are displayed here.",
+                parameters: parameters);
         }
-        private string[] decorationIds;
+        [JSInvokable("ShowCacheError")]
+        public async void ShowCacheError() =>
+            await ModalService.ShowMessageBoxAsync("Project Not Found",
+                "Hmm... It appears that the project is longer in your browser cache. I blame you, but perhaps refreshing the app and trying again will resolve it.");
 
-        protected void OnContextMenu(EditorMouseEvent eventArg)
+        public void Dispose()
         {
-
-            Console.WriteLine("OnContextMenu : " + System.Text.Json.JsonSerializer.Serialize(eventArg));
+            dotNetInstance?.Dispose();
+            AppState.PropertyChanged -= HandleCodePropertyChanged;
+            Console.WriteLine("RazorCodeHome.razor disposed");
         }
-        private async Task ChangeTheme(ChangeEventArgs e)
-        {
-            Console.WriteLine($"setting theme to: {e.Value.ToString()}");
-            await MonacoEditorBase.SetTheme(e.Value.ToString());
-        }
-
-       
-        #endregion
-
     }
 }

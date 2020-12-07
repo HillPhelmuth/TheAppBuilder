@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using AppBuilderAlone.Pages;
-using CompileRazor;
+using AppBuilder.Client.Pages;
+using AppBuilder.CompileRazor;
 using Microsoft.JSInterop;
 
-namespace AppBuilderAlone.Services
+namespace AppBuilder.Client.Services
 {
     public class RazorInterop : IAsyncDisposable
     {
@@ -15,7 +13,7 @@ namespace AppBuilderAlone.Services
         public RazorInterop(IJSRuntime jsRuntime)
         {
             moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
-                "import", "./_content/AppBuilderAlone/razorApp.js").AsTask());
+                "import", "./js/razorApp.js").AsTask());
         }
 
         public async ValueTask RazorAppInit(DotNetObjectReference<RazorCodeHome> dotNetInstance)
@@ -27,13 +25,23 @@ namespace AppBuilderAlone.Services
         public async ValueTask RazorCacheAndDisplay(byte[] assemblyBytes)
         {
             var module = await moduleTask.Value;
-            await module.InvokeVoidAsync("App.Razor.updateUserAssemblyInCacheStorage", assemblyBytes);
+            await module.InvokeVoidAsync("updateUserAssemblyInCacheStorage", assemblyBytes);
 
-            await module.InvokeVoidAsync("App.reloadIFrame", "user-page-window", DefaultStrings.MainComponentPagePath);
+            await module.InvokeVoidAsync("reloadIFrame", "user-page-window", RazorConstants.MainComponentPagePath);
+        }
+        public async ValueTask DownloadProjectFile(string filename, byte[] projectBytes)
+        {
+            var module = await moduleTask.Value;
+            await module.InvokeVoidAsync("saveAsFile", filename, projectBytes);
         }
         public async ValueTask DisposeAsync()
         {
-
+            if (moduleTask.IsValueCreated)
+            {
+                var module = await moduleTask.Value;
+                await module.InvokeVoidAsync("dispose");
+                await module.DisposeAsync();
+            }
         }
     }
 }

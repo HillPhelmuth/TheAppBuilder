@@ -1,0 +1,8 @@
+﻿
+<MatH3>Available Files</MatH3>
+
+@foreach (var file in AppState.ProjectFiles ?? new List<ProjectFile>())
+{
+    <MatButton OnClick="@(() => UpdateActiveFile(file))">@file.Name</MatButton>
+
+}

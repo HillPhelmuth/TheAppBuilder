@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading.Tasks;
+using AppBuilder.CompileConsole;
+using AppBuilder.Shared;
 using BlazorMonaco;
 using BlazorMonaco.Bridge;
 using Microsoft.AspNetCore.Components;
-using Shared;
 
-namespace AppBuilderAlone.Components
+namespace AppBuilder.Client.Components
 {
     public partial class Editor
     {
@@ -20,14 +19,25 @@ namespace AppBuilderAlone.Components
         public string CodeSnippet { get; set; }
         [Parameter]
         public EventCallback<string> OnCodeSubmit { get; set; }
+        [Parameter]
+        public string ButtonLabel { get; set; }
         protected override Task OnInitializedAsync()
         {
             Language ??= "csharp";
+            ButtonLabel ??= "Run";
             MonacoEditor = new MonacoEditor();
 
-            AppState.PropertyChanged += UpdateSnippet;
+
             return base.OnInitializedAsync();
         }
+
+        protected override Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+                AppState.PropertyChanged += UpdateSnippet;
+            return base.OnAfterRenderAsync(firstRender);
+        }
+
         public async Task SubmitCode()
         {
             var currentCode = await MonacoEditor.GetValue();
@@ -36,7 +46,8 @@ namespace AppBuilderAlone.Components
 
         protected async void UpdateSnippet(object sender, PropertyChangedEventArgs args)
         {
-
+            if (args.PropertyName != nameof(AppState.CodeSnippet)) return;
+            await MonacoEditor.SetValue(AppState.CodeSnippet);
         }
         #region Monaco Editor
         protected MonacoEditor MonacoEditor { get; set; }
@@ -54,16 +65,10 @@ namespace AppBuilderAlone.Components
                 Lightbulb = new LightbulbOptions { Enabled = true },
                 AcceptSuggestionOnEnter = "smart",
                 Language = Language,
-                Value = AppState.CodeSnippet ?? "private string MyProgram() \n" +
-                        "{\n" +
-                        "    string input = \"this does not\"; \n" +
-                        "    string modify = input + \" suck!\"; \n" +
-                        "    return modify;\n" +
-                        "}\n" +
-                        "return MyProgram();"
+                Value = AppState.CodeSnippet ?? ConsoleConstants.DefaultSnippet
             };
         }
-        
+
         protected async Task EditorOnDidInit(MonacoEditorBase editor)
         {
             await MonacoEditor.AddCommand((int)KeyMode.CtrlCmd | (int)KeyCode.KEY_H, (editor, keyCode) =>
@@ -82,6 +87,7 @@ namespace AppBuilderAlone.Components
                     //await SubmitCode();
                     Console.WriteLine("Code Executed from Editor Command");
                 });
+
             await MonacoEditor.SetValue(AppState.CodeSnippet);
             var newDecorations = new[]
             {
@@ -103,13 +109,12 @@ namespace AppBuilderAlone.Components
 
         protected void OnContextMenu(EditorMouseEvent eventArg)
         {
-
             Console.WriteLine("OnContextMenu : " + System.Text.Json.JsonSerializer.Serialize(eventArg));
         }
         private async Task ChangeTheme(ChangeEventArgs e)
         {
-            Console.WriteLine($"setting theme to: {e.Value.ToString()}");
-            await MonacoEditorBase.SetTheme(e.Value.ToString());
+            Console.WriteLine($"setting theme to: {e.Value}");
+            await MonacoEditorBase.SetTheme(e.Value?.ToString());
         }
         #endregion
     }

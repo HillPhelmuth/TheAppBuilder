@@ -8,6 +8,8 @@
     </select>
 </div>
 <MatDivider/>
-<MatButton Icon="input" OnClick="SubmitCode" Raised="true">Run</MatButton>
-<MonacoEditor ConstructionOptions="EditorOptionsRoslyn" OnDidInit="EditorOnDidInit">
-</MonacoEditor>
+<MatButton Icon="input" OnClick="SubmitCode" Raised="true">@ButtonLabel</MatButton>
+<div style="height:20rem">
+    <MonacoEditor Id="console" CssClass="editor" @ref="MonacoEditor" ConstructionOptions="EditorOptionsRoslyn" OnDidInit="EditorOnDidInit" OnContextMenu="OnContextMenu">
+    </MonacoEditor>
+</div>

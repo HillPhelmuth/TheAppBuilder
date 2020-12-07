@@ -1,19 +1,21 @@
-﻿using System;
+﻿using AppBuilder.Shared;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Shared;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
-namespace CompileConsole
+namespace AppBuilder.CompileConsole
 {
     public class CSharpCompile
     {
         private readonly List<MetadataReference> _references = new();
         private readonly IDependencyResolver _dependencyResolver;
+        private static CSharpCompilation _baseCompilation;
 
         public CSharpCompile(IDependencyResolver dependencyResolver)
         {
@@ -30,12 +32,19 @@ namespace CompileConsole
             }
 
             _references.AddRange(await _dependencyResolver.GetAssemblies());
+            //Array.Empty<SyntaxTree>()
+            _baseCompilation = CSharpCompilation.Create(
+                "AppBuilderAlone.Demo",
+                Array.Empty<SyntaxTree>(),
+                _references,
+                new CSharpCompilationOptions(OutputKind.ConsoleApplication));
         }
 
         public async Task<string> CompileAndRun(params ProjectFile[] csharpFiles)
         {
             Logs.Clear();
-
+            var filesString = JsonSerializer.Serialize(csharpFiles);
+            Console.WriteLine($"Files json: \r\n {filesString}");
             var assembly = await Compile(csharpFiles);
 
             return Run(assembly);
@@ -47,16 +56,28 @@ namespace CompileConsole
             await Init();
 
             // Convert the C# files into syntax trees.
-            var syntaxTrees = csharpFiles
-                .Select(x => CSharpSyntaxTree
-                .ParseText(x.Content, new CSharpParseOptions(LanguageVersion.Preview), x.Name));
+            IEnumerable<SyntaxTree> syntaxTrees = new List<SyntaxTree>();
 
+            //try
+            //{
+            var source = csharpFiles[0].Content;
+            var compilation2 = CSharpCompilation.Create("DynamicCode")
+                .WithOptions(new CSharpCompilationOptions(OutputKind.ConsoleApplication))
+                .AddReferences(_references)
+                .AddSyntaxTrees(CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview)));
+
+            syntaxTrees = csharpFiles
+            .Select(x => CSharpSyntaxTree
+            .ParseText(x.Content, new CSharpParseOptions(LanguageVersion.Preview)/*, x.Name*/));
+            //}
+            //catch (Exception ex)
+            //{
+            //    Logs.Add($"Compile failed.\r\n{ex.Message}\r\n\t{ex.StackTrace}");
+            //}
+
+            _baseCompilation.AddSyntaxTrees(syntaxTrees);
             // Create a new compilation with the source code and the assembly references.
-            var compilation = CSharpCompilation.Create(
-                "ConsoleAppWasm.Demo",
-                syntaxTrees,
-                _references,
-                new CSharpCompilationOptions(OutputKind.ConsoleApplication));
+            var compilation = compilation2; /*_baseCompilation;*/
 
             await using var stream = new MemoryStream();
 
@@ -72,6 +93,8 @@ namespace CompileConsole
             {
                 Logs.Add("");
                 Logs.Add("Build FAILED.");
+                Logs.Add($"Error: {string.Join(", ", result.Diagnostics.Select(x => x.GetMessage()))}");
+                Console.WriteLine(string.Join("\r\n", Logs));
                 throw new CSharpCompilationException();
             }
 

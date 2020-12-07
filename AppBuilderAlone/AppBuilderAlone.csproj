@@ -3,14 +3,36 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+    <RootNamespace>AppBuilder.Client</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\RazorProject\ProjectCrudModal.razor.cs" />
+    <Compile Remove="Services\RazorCompile.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Components\RazorProject\ProjectCrudModal.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Components\RazorProject\CodeFileModal.razor" />
+    <None Include="Components\RazorProject\DefaultOutput.razor" />
+    <None Include="Components\RazorProject\RazorSamplesModal.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BlazorMonaco" Version="1.5.0" />
+    <PackageReference Include="Faso.Blazor.SpinKit" Version="1.0.1" />
     <PackageReference Include="MatBlazor" Version="2.8.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="5.0.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
     <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
+    <PackageReference Include="LiquidTechnologies.Blazor.ModalDialog" Version="0.9.7" />
   </ItemGroup>
 
   <ItemGroup>

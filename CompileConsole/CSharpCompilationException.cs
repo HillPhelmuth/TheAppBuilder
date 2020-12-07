@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CompileConsole
+namespace AppBuilder.CompileConsole
 {
     public class CSharpCompilationException : Exception
     {

@@ -1,24 +1,24 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shared
+namespace AppBuilder.Shared
 {
-
     public class ZipService
     {
         public async Task<List<ProjectFile>> ExtractFiles(Stream fileData)
         {
+            var sw = new Stopwatch();
+            sw.Start();
             await using var ms = new MemoryStream();
             await fileData.CopyToAsync(ms);
-
             using var archive = new ZipArchive(ms, ZipArchiveMode.Update);
-
             CleanUpSolution(archive);
-
             var entries = new List<ProjectFile>();
 
             foreach (var entry in archive.Entries.Where(x => x.FullName.EndsWith(".cs") || x.FullName.EndsWith(".razor")))
@@ -26,11 +26,35 @@ namespace Shared
                 await using var fileStream = entry.Open();
                 var fileBytes = await fileStream.ReadFully();
                 var content = Encoding.UTF8.GetString(fileBytes);
+                entries.Add(new ProjectFile { Name = entry.FullName, Content = content, FileType = entry.FullName.EndsWith(".cs") ? FileType.Class : FileType.Razor });
+            }
+            sw.Stop();
+            Console.WriteLine($"ExtractFiles in {sw.ElapsedMilliseconds}");
+            return entries;
+        }
 
-                entries.Add(new ProjectFile { Name = entry.FullName, Content = content });
+        public Task<byte[]> ZipUpFiles(List<ProjectFile> projectFiles)
+        {
+            using var memoryStream = new MemoryStream();
+            using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create))
+            {
+                foreach (var file in projectFiles)
+                {
+                    var demoFile = archive.CreateEntry(file.Name);
+
+                    using var entryStream = demoFile.Open();
+                    using var streamWriter = new StreamWriter(entryStream);
+                    streamWriter.Write(file.Content);
+                }
+
             }
 
-            return entries;
+            //using (var fileStream = new FileStream(@"C:\Temp\test.zip", FileMode.Create))
+            //{
+            //    memoryStream.Seek(0, SeekOrigin.Begin);
+            //    memoryStream.CopyTo(fileStream);
+            //}
+            return Task.FromResult(memoryStream.ToArray());
         }
 
         private static void CleanUpSolution(ZipArchive archive)

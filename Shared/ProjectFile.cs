@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Shared
+namespace AppBuilder.Shared
 {
     public class ProjectFile
     {
@@ -17,7 +17,13 @@ namespace Shared
         [EnumString("razor")]
         Razor
     }
-
+    public enum ProjectType
+    {
+        [EnumString("Blazor")]
+        Blazor,
+        [EnumString("Console")]
+        Console
+    }
     public class EnumString : Attribute
     {
         public EnumString(string value)
@@ -25,5 +31,20 @@ namespace Shared
             Value = value;
         }
         public string Value { get; }
+    }
+    public static class ValueExtensions
+    {
+        public static string AsString(this Enum value)
+        {
+            string output = null;
+            var type = value.GetType();
+            var fi = type.GetField(value.ToString());
+            var attrs = fi.GetCustomAttributes(typeof(EnumString), false) as EnumString[];
+            if (attrs.Length > 0)
+            {
+                output = attrs[0].Value;
+            }
+            return output;
+        }
     }
 }

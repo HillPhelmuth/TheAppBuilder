@@ -9,9 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Output", "Output\Output.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompileRazor", "CompileRazor\CompileRazor.csproj", "{11045444-5638-47EE-9170-00569F984E62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{0BE26B8B-34D0-4C62-8518-4E4F2C983420}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{0BE26B8B-34D0-4C62-8518-4E4F2C983420}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompileConsole", "CompileConsole\CompileConsole.csproj", "{1ABF1A20-A58F-4DB3-8A3A-616BB48876DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompileConsole", "CompileConsole\CompileConsole.csproj", "{1ABF1A20-A58F-4DB3-8A3A-616BB48876DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

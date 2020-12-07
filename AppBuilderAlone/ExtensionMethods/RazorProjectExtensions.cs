@@ -1,21 +1,21 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AppBuilderAlone.Pages;
-using CompileRazor;
+using AppBuilder.Client.Pages;
+using AppBuilder.CompileRazor;
+using AppBuilder.Shared;
 using Microsoft.JSInterop;
-using Shared;
 
-namespace AppBuilderAlone.ExtensionMethods
+namespace AppBuilder.Client.ExtensionMethods
 {
     public static class RazorProjectExtensions
     {
         public static List<ProjectFile> PagifyMainComponent(this List<ProjectFile> codeFiles)
         {
-            var mainComponent = codeFiles.FirstOrDefault(x => x.Name == DefaultStrings.MainComponentFilePath);
+            var mainComponent = codeFiles.FirstOrDefault(x => x.Name == RazorConstants.DefaultComponentName);
             if (!mainComponent.Content.Contains("@page"))
             {
-                mainComponent.Content = DefaultStrings.MainComponentCodePrefix + mainComponent.Content;
+                mainComponent.Content = RazorConstants.MainComponentCodePrefix + mainComponent.Content;
             }
 
             return codeFiles;
@@ -23,7 +23,7 @@ namespace AppBuilderAlone.ExtensionMethods
 
         public static List<ProjectFile> UnPagifyMainComponent(this List<ProjectFile> codeFiles, string originalContent)
         {
-            var mainComponent = codeFiles.FirstOrDefault(x => x.Name == DefaultStrings.MainComponentFilePath);
+            var mainComponent = codeFiles.FirstOrDefault(x => x.Name == RazorConstants.DefaultComponentName);
             if (mainComponent.Content.Contains("@page"))
             {
                 mainComponent.Content = originalContent;
@@ -42,7 +42,7 @@ namespace AppBuilderAlone.ExtensionMethods
         {
             await jsRuntime.InvokeVoidAsync("App.Razor.updateUserAssemblyInCacheStorage", assemblyBytes);
 
-            await jsRuntime.InvokeVoidAsync("App.reloadIFrame", "user-page-window", DefaultStrings.MainComponentPagePath);
+            await jsRuntime.InvokeVoidAsync("App.reloadIFrame", "user-page-window", RazorConstants.MainComponentPagePath);
         }
     }
 }

@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AppBuilder.Shared;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CompileConsole
+namespace AppBuilder.CompileConsole
 {
     public static class ConsoleServicesExtension
     {
-
         public static IServiceCollection AddConsoleServices(this IServiceCollection service)
         {
-            service.AddScoped<IDependencyResolver, BlazorDependencyResolver>();
+            //service.AddScoped<IDependencyResolver, ConsoleDependencyResolver>();
             service.AddScoped<CSharpCompile>();
             return service;
         }

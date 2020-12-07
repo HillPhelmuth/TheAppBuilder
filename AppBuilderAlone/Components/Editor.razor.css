@@ -1,4 +1,4 @@
-﻿.editor {
+﻿::deep .editor {
     height: 20em;
     flex-direction: column
 }

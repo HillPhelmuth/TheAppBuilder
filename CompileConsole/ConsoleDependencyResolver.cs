@@ -11,12 +11,12 @@ namespace CompileConsole
     {
         Task<List<MetadataReference>> GetAssemblies();
     }
-     
-    public class BlazorDependencyResolver : IDependencyResolver
+
+    public class ConsoleDependencyResolver : IDependencyResolver
     {
         private readonly HttpClient _http;
 
-        public BlazorDependencyResolver(HttpClient http)
+        public ConsoleDependencyResolver(HttpClient http)
         {
             _http = http;
         }
@@ -30,7 +30,7 @@ namespace CompileConsole
                 {
                 // Add any required dll that are not referenced in the Blazor application
                 "System.Console",
-                    //"",
+                    "System.Linq","System.Collection.Generics"
                     //""
                 })
                 .Distinct()

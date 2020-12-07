@@ -1,11 +1,46 @@
-﻿<div class="mat-layout-grid">
-    <div class="mat-layout-grid-inner">
-        <div class="mat-layout-grid-cell mat-layout-grid-cell-span-12">
+﻿@page "/razorHome"
+@*@layout MainLayout*@
+<MatH4 Class="text-center">Build a project with Razor Components</MatH4>
+<MatButtonLink Href="/">Home</MatButtonLink>
+@*<button @onclick="@(() => isready = true)">Ready</button>*@
+@if (isready)
+{
+    <div class="mat-layout-grid">
+        <div class="mat-layout-grid-inner">
+            <div class="mat-layout-grid-cell mat-layout-grid-cell-span-12">
+                <MatButton OnClick="StartExecute" Raised="true">Execute Project</MatButton>                
+            </div>
+            <div class="mat-layout-grid-cell mat-layout-grid-cell-span-6">
+                @if (isCSharp)
+                {
+                <Editor ButtonLabel="Save to project" CodeSnippet="@AppState.CodeSnippet" Language="@AppState.Language" OnCodeSubmit="HandleSaveToProject" />
+                }
+                else
+                {
+                    <Editor ButtonLabel="Save to project" CodeSnippet="@AppState.CodeSnippet" Language="@AppState.Language" OnCodeSubmit="HandleSaveToProject" />
+                }
+
+            </div>
+            <div class="mat-layout-grid-cell mat-layout-grid-cell-span-6">
+                <MatH5>Active Component: @AppState.ActiveProjectFile.Name</MatH5>
+                @if (isCodeCompiling)
+                {
+                    <hr />
+                    <MatH4 Class="text-center" Style="color: blue">Executing...</MatH4>
+                    <SpinKitFadingCircle />
+                    <hr />
+                }
+                <iframe style="height: 500px; width: 100%" id="user-page-window" src="/defaultOutput"></iframe>
+
+            </div>
+            <div id="user-page-window-container" class="mat-layout-grid-cell mat-layout-grid-cell-span-6">
+                <button class="mat-elevation-z24 output-button @buttonCss" @onclick="ShowDiags">Click to view compilation errors.</button>
+               
+
+            </div>
 
         </div>
     </div>
-</div>
-
-@code {
-
+  
 }
+
