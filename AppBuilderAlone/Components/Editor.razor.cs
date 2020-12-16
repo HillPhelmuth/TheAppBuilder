@@ -20,6 +20,8 @@ namespace AppBuilder.Client.Components
         [Parameter]
         public EventCallback<string> OnCodeSubmit { get; set; }
         [Parameter]
+        public EventCallback<string> OnSave { get; set; }
+        [Parameter]
         public string ButtonLabel { get; set; }
         protected override Task OnInitializedAsync()
         {
@@ -43,11 +45,17 @@ namespace AppBuilder.Client.Components
             var currentCode = await MonacoEditor.GetValue();
             await OnCodeSubmit.InvokeAsync(currentCode);
         }
-
+        public async Task SaveCode()
+        {
+            var currentCode = await MonacoEditor.GetValue();
+            await OnSave.InvokeAsync(currentCode);
+        }
         protected async void UpdateSnippet(object sender, PropertyChangedEventArgs args)
         {
-            if (args.PropertyName != nameof(AppState.CodeSnippet)) return;
-            await MonacoEditor.SetValue(AppState.CodeSnippet);
+            if (args.PropertyName != nameof(AppState.CodeSnippet) && args.PropertyName != nameof(AppState.ActiveProjectFile)) return;
+            var newCode = args.PropertyName == nameof(AppState.ActiveProjectFile) ? AppState.ActiveProjectFile.Content : AppState.CodeSnippet;
+            await MonacoEditor.SetValue(newCode);
+            StateHasChanged();
         }
         #region Monaco Editor
         protected MonacoEditor MonacoEditor { get; set; }
@@ -65,7 +73,7 @@ namespace AppBuilder.Client.Components
                 Lightbulb = new LightbulbOptions { Enabled = true },
                 AcceptSuggestionOnEnter = "smart",
                 Language = Language,
-                Value = AppState.CodeSnippet ?? ConsoleConstants.DefaultSnippet
+                Value = AppState.ActiveProjectFile?.Content ?? ConsoleConstants.DefaultSnippet
             };
         }
 
@@ -84,7 +92,7 @@ namespace AppBuilder.Client.Components
                 new int[] { (int)KeyMode.CtrlCmd | (int)KeyCode.Enter }, null, null, "navigation", 2.5,
                 async (editor, keyCodes) =>
                 {
-                    //await SubmitCode();
+                    await SubmitCode();
                     Console.WriteLine("Code Executed from Editor Command");
                 });
 

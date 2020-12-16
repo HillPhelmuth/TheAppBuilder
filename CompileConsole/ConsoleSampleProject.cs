@@ -14,7 +14,7 @@ namespace AppBuilder.CompileConsole
             new ProjectFile
             {
                 Name = ConsoleConstants.DefaultConsoleName,
-                Content = ConsoleConstants.DefaultSnippet,
+                Content = ConsoleConstants.SampleProjectMain,
                 FileType = FileType.Class
             },
             new ProjectFile

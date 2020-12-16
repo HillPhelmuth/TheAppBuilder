@@ -1,0 +1,10 @@
+﻿.alert_output {
+    animation: blinker 1s linear infinite;
+    font-size: 120%;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}

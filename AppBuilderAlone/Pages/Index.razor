@@ -5,11 +5,7 @@
         <MatH1>App Builder</MatH1>
         @*<MatButton OnClick="DownloadRepo" Label="Download Repo"></MatButton>*@
         <UploadProject OnProjectFileUpload="HandleProjectUpload" />
-        @*<div style="margin-top:15rem; margin-right:auto;margin-right:auto">
-            <MatButtonLink Href="/console"><MatH6>Console App</MatH6> </MatButtonLink>
-            <hr />
-            <MatButtonLink Href="/razorHome"><MatH6>Razor App</MatH6> </MatButtonLink>
-        </div>*@
+        <MatButton Raised="true" OnClick="RecoverState">Recover State</MatButton>
         <div class="mat-layout-grid">
             <div class="mat-layout-grid-inner">
                 @if (ExtractedFiles != null)

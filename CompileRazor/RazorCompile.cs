@@ -155,10 +155,7 @@ namespace AppBuilder.CompileRazor
             var result = new CodeAssemblyModel
             {
                 Compilation = finalCompilation,
-                Diagnostics = compilationDiagnostics.Select(diag => new CustomDiag(diag)),
-                //.Select(CompilationDiagnostic.FromCSharpDiagnostic)
-                //.Concat(cSharpResults.SelectMany(r => r.Diagnostics))
-                //.ToList(),
+                Diagnostics = compilationDiagnostics.Select(diag => new CustomDiag(diag))
             };
 
             if (result.Diagnostics.All(x => x.Severity != DiagnosticSeverity.Error))
@@ -215,12 +212,13 @@ namespace AppBuilder.CompileRazor
         {
             var basicReferenceAssemblyRoots = new[]
             {
-                typeof(AssemblyTargetedPatchBandAttribute).Assembly, // System.Runtime
+                typeof(Console).Assembly, // System.Console
+                typeof(Uri).Assembly, // System.Private.Uri
+                typeof(AssemblyTargetedPatchBandAttribute).Assembly, // System.Private.CoreLib
                 typeof(NavLink).Assembly, // Microsoft.AspNetCore.Components.Web
-                typeof(IQueryable).Assembly, // System.Linq
+                typeof(IQueryable).Assembly, // System.Linq.Expressions
                 typeof(HttpClientJsonExtensions).Assembly, // System.Net.Http.Json
                 typeof(HttpClient).Assembly, // System.Net.Http
-                typeof(Uri).Assembly, // System.Private.Uri
                 typeof(IJSRuntime).Assembly, // Microsoft.JSInterop
                 typeof(RequiredAttribute).Assembly, // System.ComponentModel.Annotations
             };
@@ -243,11 +241,6 @@ namespace AppBuilder.CompileRazor
                 .Select(a => a.Value)
                 .ToList();
             _appState.References = _references.ToList();
-            //if (_references != null && _references.Any())
-            //{
-            //    return;
-            //}
-            //_references = await _dependencyResolver.GetRazorAssemblies();
             _baseCompilation = CSharpCompilation.Create(
                 "Output",
                 Array.Empty<SyntaxTree>(),
@@ -262,9 +255,7 @@ namespace AppBuilder.CompileRazor
                 assemblyNames.Select(async assemblyName =>
                 {
                     var result = await httpClient.GetAsync($"/_framework/{assemblyName}.dll");
-
                     result.EnsureSuccessStatusCode();
-
                     streams.TryAdd(assemblyName, await result.Content.ReadAsStreamAsync());
                 }));
 

@@ -1,4 +1,5 @@
 ﻿using AppBuilder.Shared;
+using Blazor.ModalDialog;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -11,36 +12,28 @@ using System.Threading.Tasks;
 
 namespace AppBuilder.CompileConsole
 {
-    public class CSharpCompile
+    public class ConsoleCompile
     {
         private readonly List<MetadataReference> _references = new();
         private readonly IDependencyResolver _dependencyResolver;
-        private static CSharpCompilation _baseCompilation;
-
-        public CSharpCompile(IDependencyResolver dependencyResolver)
+       
+        public ConsoleCompile(IDependencyResolver dependencyResolver)
         {
             _dependencyResolver = dependencyResolver;
         }
 
         public List<string> Logs { get; } = new();
 
-        public async Task Init()
+        public async Task InitAsync()
         {
-            if (_references.Any())
+            if (_references.Count == 0)
             {
-                return;
+                _references.AddRange(await _dependencyResolver.GetAssemblies(true));
             }
-
-            _references.AddRange(await _dependencyResolver.GetAssemblies());
-            //Array.Empty<SyntaxTree>()
-            _baseCompilation = CSharpCompilation.Create(
-                "AppBuilderAlone.Demo",
-                Array.Empty<SyntaxTree>(),
-                _references,
-                new CSharpCompilationOptions(OutputKind.ConsoleApplication));
+            
         }
 
-        public async Task<string> CompileAndRun(params ProjectFile[] csharpFiles)
+        public async Task<string> CompileAndRun(ProjectFile[] csharpFiles)
         {
             Logs.Clear();
             var filesString = JsonSerializer.Serialize(csharpFiles);
@@ -50,35 +43,20 @@ namespace AppBuilder.CompileConsole
             return Run(assembly);
         }
 
-        public async Task<Assembly> Compile(params ProjectFile[] csharpFiles)
+        public async Task<Assembly> Compile(ProjectFile[] csharpFiles)
         {
             // Make sure the needed assembly references are available.
-            await Init();
+            await InitAsync();
 
             // Convert the C# files into syntax trees.
-            IEnumerable<SyntaxTree> syntaxTrees = new List<SyntaxTree>();
-
-            //try
-            //{
-            var source = csharpFiles[0].Content;
-            var compilation2 = CSharpCompilation.Create("DynamicCode")
+            var compilation = CSharpCompilation.Create("DynamicCode")
                 .WithOptions(new CSharpCompilationOptions(OutputKind.ConsoleApplication))
                 .AddReferences(_references)
-                .AddSyntaxTrees(CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview)));
+                .AddSyntaxTrees(csharpFiles.Select(x => CSharpSyntaxTree.ParseText(x.Content, new CSharpParseOptions(LanguageVersion.Preview)/*, x.Name*/)));
 
-            syntaxTrees = csharpFiles
-            .Select(x => CSharpSyntaxTree
-            .ParseText(x.Content, new CSharpParseOptions(LanguageVersion.Preview)/*, x.Name*/));
-            //}
-            //catch (Exception ex)
-            //{
-            //    Logs.Add($"Compile failed.\r\n{ex.Message}\r\n\t{ex.StackTrace}");
-            //}
-
-            _baseCompilation.AddSyntaxTrees(syntaxTrees);
-            // Create a new compilation with the source code and the assembly references.
-            var compilation = compilation2; /*_baseCompilation;*/
-
+            var tempTreesJson = JsonSerializer.Serialize(compilation.SyntaxTrees);
+            Console.WriteLine($"Syntax Trees:\r\n{tempTreesJson}");
+            
             await using var stream = new MemoryStream();
 
             // Emit the IL for the compiled source code into the stream.
@@ -95,7 +73,7 @@ namespace AppBuilder.CompileConsole
                 Logs.Add("Build FAILED.");
                 Logs.Add($"Error: {string.Join(", ", result.Diagnostics.Select(x => x.GetMessage()))}");
                 Console.WriteLine(string.Join("\r\n", Logs));
-                throw new CSharpCompilationException();
+                return null;
             }
 
             Logs.Add("");
@@ -105,26 +83,31 @@ namespace AppBuilder.CompileConsole
             stream.Seek(0, SeekOrigin.Begin);
 
             // Load the newly created assembly into the current application domain.
-            var assembly = AppDomain.CurrentDomain.Load(stream.ToArray());
+            //var assembly = AppDomain.CurrentDomain.Load(stream.ToArray());
+            var assembly = Assembly.Load(stream.ToArray());
 
             return assembly;
         }
 
-        public static string Run(Assembly assembly)
+        public string Run(Assembly assembly)
         {
+            if (assembly == null)
+                return "Must have been some sort of fuck-up";
             // Capture the Console outputs.
-            using var sw = new StringWriter();
-            Console.SetOut(sw);
+            var currentOut = Console.Out;
+            var writer = new StringWriter();
+            Console.SetOut(writer);
 
             var main = assembly.EntryPoint;
 
-            var parameters = main.GetParameters().Any()
+            var parameters = main.GetParameters().Length > 0
                 ? new object[] { Array.Empty<string>() }
                 : null;
 
             main.Invoke(null, parameters);
-
-            return sw.ToString();
+            var output = writer.ToString();
+            Console.SetOut(currentOut);
+            return output;
         }
     }
 }

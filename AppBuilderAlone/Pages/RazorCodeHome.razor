@@ -2,18 +2,26 @@
 @*@layout MainLayout*@
 <MatH4 Class="text-center">Build a project with Razor Components</MatH4>
 <MatButtonLink Href="/">Home</MatButtonLink>
-@*<button @onclick="@(() => isready = true)">Ready</button>*@
+
 @if (isready)
 {
     <div class="mat-layout-grid">
         <div class="mat-layout-grid-inner">
             <div class="mat-layout-grid-cell mat-layout-grid-cell-span-12">
-                <MatButton OnClick="StartExecute" Raised="true">Execute Project</MatButton>                
+                <MatButton OnClick="StartExecute" Raised="true">Execute Project</MatButton>
             </div>
             <div class="mat-layout-grid-cell mat-layout-grid-cell-span-6">
+                <MatTabBar ActiveChanged="HandleTabFileChange">
+                    @foreach (var file in AppState.ProjectFiles ?? new List<ProjectFile>())
+                    {
+
+                        <MatTabLabel Id="@file.Name">@file.Name
+                        </MatTabLabel>
+                    }
+                </MatTabBar>
                 @if (isCSharp)
                 {
-                <Editor ButtonLabel="Save to project" CodeSnippet="@AppState.CodeSnippet" Language="@AppState.Language" OnCodeSubmit="HandleSaveToProject" />
+                    <Editor ButtonLabel="Save to project" CodeSnippet="@AppState.CodeSnippet" Language="@AppState.Language" OnCodeSubmit="HandleSaveToProject" />
                 }
                 else
                 {
@@ -35,12 +43,12 @@
             </div>
             <div id="user-page-window-container" class="mat-layout-grid-cell mat-layout-grid-cell-span-6">
                 <button class="mat-elevation-z24 output-button @buttonCss" @onclick="ShowDiags">Click to view compilation errors.</button>
-               
+
 
             </div>
 
         </div>
     </div>
-  
+
 }
 

@@ -16,7 +16,16 @@
                 <SpinKitFadingCircle />
                 <hr />
             }
-            <Editor ButtonLabel="Compile and Run" CodeSnippet="@AppState.CodeSnippet" Language="@AppState.Language" OnCodeSubmit="HandleCodeSubmit"/>
+            <MatTabBar ActiveChanged="HandleTabFileChange">
+                @foreach (var file in AppState.ProjectFiles ?? new List<ProjectFile>())
+                {
+
+                    <MatTabLabel Id="@file.Name">
+                        @file.Name
+                    </MatTabLabel>
+                }
+            </MatTabBar>
+            <Editor ButtonLabel="Compile and Run" CodeSnippet="@AppState.CodeSnippet" Language="@AppState.Language" OnCodeSubmit="HandleCodeSubmit" OnSave="HandleSave" />
         </div>
         <div id="user-console-window-container" class="mat-layout-grid-cell mat-layout-grid-cell-span-5">
             <pre>@AppState.CurrentOutput</pre>

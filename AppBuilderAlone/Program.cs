@@ -6,6 +6,7 @@ using AppBuilder.CompileConsole;
 using AppBuilder.CompileRazor;
 using AppBuilder.Shared;
 using Blazor.ModalDialog;
+using Blazored.LocalStorage;
 using MatBlazor;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +28,7 @@ namespace AppBuilder.Client
             builder.Services.AddConsoleServices();
             builder.Services.AddAuthentication();
             builder.Services.AddScoped<RazorCompile>();
+            builder.Services.AddBlazoredLocalStorage();
             await builder.Build().RunAsync();
         }
     }

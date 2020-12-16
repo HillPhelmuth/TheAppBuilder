@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using AppBuilder.Client.Pages;
 using AppBuilder.CompileRazor;
 using Microsoft.JSInterop;
+using Index = AppBuilder.Client.Pages.Index;
 
 namespace AppBuilder.Client.Services
 {
@@ -33,6 +34,17 @@ namespace AppBuilder.Client.Services
         {
             var module = await moduleTask.Value;
             await module.InvokeVoidAsync("saveAsFile", filename, projectBytes);
+        }
+
+        public async ValueTask InitOnOffLine(DotNetObjectReference<Index> objRef)
+        {
+            var module = await moduleTask.Value;
+            await module.InvokeVoidAsync("initOnOffLine", objRef);
+        }
+        public async ValueTask CopyToClipboard(string text)
+        {
+            var module = await moduleTask.Value;
+            await module.InvokeVoidAsync("copyToClipboard", text);
         }
         public async ValueTask DisposeAsync()
         {

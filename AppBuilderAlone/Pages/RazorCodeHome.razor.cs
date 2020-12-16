@@ -10,6 +10,7 @@ using AppBuilder.Client.Services;
 using AppBuilder.CompileRazor;
 using AppBuilder.Shared;
 using Blazor.ModalDialog;
+using MatBlazor;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -18,11 +19,7 @@ using Microsoft.JSInterop;
 namespace AppBuilder.Client.Pages
 {
     public partial class RazorCodeHome : IDisposable
-    {
-        //[Inject]
-        //public AppState AppState { get; set; }
-        //[Inject]
-        //public PublicClient PublicClient { get; set; }
+    {       
         [Inject]
         public AppState AppState { get; set; }
         [Inject]
@@ -48,13 +45,14 @@ namespace AppBuilder.Client.Pages
         private string buttonCss = "";
         protected override async Task OnInitializedAsync()
         {
-            AppState.CodeSnippet = sampleSnippet;
+            //AppState.CodeSnippet = sampleSnippet;
             var mainCodeFile = new ProjectFile { Name = MainComponentFilePath, Content = sampleSnippet, FileType = FileType.Razor };
             AppState.ActiveProjectFile = mainCodeFile;
-            //CodeEditorService.SaveCode(mainCodeFile);
-            AppState.PropertyChanged += HandleCodePropertyChanged;
+           
+            AppState.ActiveProject ??= new UserProject { Name = "DefaultProject", Files = new List<ProjectFile> { mainCodeFile } };
             await Task.Delay(50);
             await RazorCompile.InitAsync();
+            AppState.PropertyChanged += HandleCodePropertyChanged;
             isready = true;
             await base.OnInitializedAsync();
         }
@@ -63,7 +61,8 @@ namespace AppBuilder.Client.Pages
         {
             if (firstRender)
             {
-                AppState.CodeSnippet = sampleSnippet;
+                AppState.ActiveProjectFile ??= new ProjectFile { Name = MainComponentFilePath, Content = sampleSnippet, FileType = FileType.Razor };
+                //AppState.CodeSnippet = sampleSnippet;
                 dotNetInstance = DotNetObjectReference.Create(this);
                 await RazorInterop.RazorAppInit(dotNetInstance);
             }
@@ -120,14 +119,18 @@ namespace AppBuilder.Client.Pages
             string code = result.ReturnParameters.Get<string>("FileCode");
             AppState.CodeSnippet = code;
         }
+        private void HandleTabFileChange(BaseMatTabLabel baseMatTab)
+        {
+            AppState.ActiveProjectFile = AppState.ProjectFiles.FirstOrDefault(x => x.Name == baseMatTab.Id);
+        }
         private void HandleCodePropertyChanged(object sender, PropertyChangedEventArgs args)
         {
-            if (args.PropertyName != "ActiveCodeFile" && args.PropertyName != "ActiveProject") return;
-            AppState.CodeSnippet = AppState.ActiveProjectFile.Content;
+            if (args.PropertyName !=nameof(AppState.ActiveProjectFile) && args.PropertyName != nameof(AppState.ActiveProject)) return;
+            //AppState.CodeSnippet = AppState.ActiveProjectFile.Content;
             AppState.ProjectFiles = AppState.ActiveProject.Files;
             StateHasChanged();
         }
-
+        
         private async Task ShowDiags()
         {
             buttonCss = "";

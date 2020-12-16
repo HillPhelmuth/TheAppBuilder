@@ -8,7 +8,8 @@ namespace AppBuilder.CompileConsole
         public static IServiceCollection AddConsoleServices(this IServiceCollection service)
         {
             //service.AddScoped<IDependencyResolver, ConsoleDependencyResolver>();
-            service.AddScoped<CSharpCompile>();
+            service.AddScoped<ConsoleCompile>();
+            
             return service;
         }
     }

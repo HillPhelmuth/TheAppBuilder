@@ -16,8 +16,9 @@ namespace AppBuilder.Shared
 {
     public interface IDependencyResolver
     {
-        Task<List<MetadataReference>> GetAssemblies();
-        Task<IEnumerable<MetadataReference>> GetRazorAssemblies();
+        //Task<List<MetadataReference>> GetAssemblies();
+        Task<IEnumerable<MetadataReference>> GetAssemblies();
+        Task<List<MetadataReference>> GetAssemblies(bool isConsole);
     }
 
     public class DependencyResolver : IDependencyResolver
@@ -29,7 +30,7 @@ namespace AppBuilder.Shared
             _http = http;
         }
 
-        public async Task<List<MetadataReference>> GetAssemblies()
+        public async Task<List<MetadataReference>> GetAssemblies(bool isConsole)
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(x => !x.IsDynamic)
@@ -57,7 +58,7 @@ namespace AppBuilder.Shared
 
             return references;
         }
-        public async Task<IEnumerable<MetadataReference>> GetRazorAssemblies(/*HttpClient httpClient*/)
+        public async Task<IEnumerable<MetadataReference>> GetAssemblies()
         {
             HttpClient httpClient = _http;
             var assemblies = AppDomain.CurrentDomain.GetAssemblies()

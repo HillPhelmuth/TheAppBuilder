@@ -40,8 +40,12 @@ public class Program
     {
       Console.WriteLine(i);
     }
-  }";
-        public const string SampleProjectTest = @"public static class Test
+  }
+}";
+        public const string SampleProjectTest = @"using System.Collections.Generic;
+using System.Linq;
+using System;
+public static class Test
 {
   public static IEnumerable<int> Fibonacci()
   {

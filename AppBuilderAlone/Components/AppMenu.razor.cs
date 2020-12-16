@@ -80,12 +80,14 @@ namespace AppBuilder.Client.Components
             AppState.ActiveProject = new UserProject { Name = "SAMPLE", Files = sampleProjectFiles };
             AppState.ProjectFiles = sampleProjectFiles;
             AppState.ActiveProjectFile = sampleMain;
-            AppState.CodeSnippet = sampleMain?.Content;
+            //AppState.CodeSnippet = sampleMain?.Content;
             ModalService.Close(true);
         }
         private void HandleProjectUpload(List<ProjectFile> projectFiles)
         {
             AppState.ProjectFiles = projectFiles;
+            AppState.ActiveProjectFile = projectFiles.FirstOrDefault(x => x.Name == RazorConstants.DefaultComponentName || x.Name == ConsoleConstants.DefaultConsoleName);
+            AppState.ActiveProject.Files.AddRange(projectFiles);
             ModalService.Close(true);
         }
         protected async Task SelectActiveFile()
@@ -104,7 +106,7 @@ namespace AppBuilder.Client.Components
                 await InvokeAsync(StateHasChanged);
                 await Task.Delay(50);
                 AppState.ActiveProjectFile = codeFile;
-                AppState.CodeSnippet = codeFile.Content;
+                //AppState.CodeSnippet = codeFile.Content;
             }
             ModalService.Close(true);
         }
@@ -151,7 +153,8 @@ namespace AppBuilder.Client.Components
             var result = await ModalService.ShowDialogAsync<GitHubForm>("Get code from a public Github Repo", option);
             if (!result.Success) return;
             string code = result.ReturnParameters.Get<string>("FileCode");
-            AppState.CodeSnippet = code;
+            AppState.ActiveProjectFile.Content = code;
+            //AppState.CodeSnippet = code;
             ModalService.Close(true);
         }
 

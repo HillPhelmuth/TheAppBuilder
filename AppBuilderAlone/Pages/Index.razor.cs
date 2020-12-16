@@ -4,9 +4,16 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using AppBuilder.Client.Components;
+using AppBuilder.Client.Services;
+using AppBuilder.CompileConsole;
+using AppBuilder.CompileRazor;
 using AppBuilder.Shared;
+using AppBuilder.Shared.StaticAuth.Interfaces;
 using Blazor.ModalDialog;
+using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.JSInterop;
 
 namespace AppBuilder.Client.Pages
 {
@@ -20,8 +27,19 @@ namespace AppBuilder.Client.Pages
         private GithubClient GithubClient { get; set; }
         [Inject]
         private ZipService ZipService { get; set; }
-        private List<ProjectFile> ExtractedFiles { get; set; } = new List<ProjectFile>();
-
+        [Inject]
+        private ConsoleCompile CompileService { get; set; }
+        [Inject]
+        private RazorCompile RazorCompile { get; set; }
+        [Inject]
+        private IJSRuntime JsRuntime { get; set; }
+        [Inject]
+        private ISyncLocalStorageService LocalStorage { get; set; }
+        [Inject]
+        private ICustomAuthenticationStateProvider AuthenticationState { get; set; }
+        private RazorInterop RazorInterop => new(JsRuntime);
+        private List<ProjectFile> ExtractedFiles { get; set; } = new();
+        private DotNetObjectReference<Index> IndexObject;
         private string orgName;
         private string repoName;
         private string fileName;
@@ -31,7 +49,17 @@ namespace AppBuilder.Client.Pages
             AppState.PropertyChanged += HandleCodePropertyChanged;
             await base.OnInitializedAsync();
         }
-
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                await CompileService.InitAsync();
+                await RazorCompile.InitAsync();
+                IndexObject = DotNetObjectReference.Create(this);
+                await RazorInterop.InitOnOffLine(IndexObject);
+            }
+            await base.OnAfterRenderAsync(firstRender);
+        }
         private void HandleProjectUpload(List<ProjectFile> projectFiles)
         {
             AppState.ProjectFiles = projectFiles;
@@ -61,16 +89,29 @@ namespace AppBuilder.Client.Pages
             var apiResponse = await GithubClient.CodeFromPublicRepo(orgName, repoName, fileName);
             ExtractedFiles = await ZipService.ExtractFiles(apiResponse);
         }
+
+        private void RecoverState()
+        {
+            var storedState = LocalStorage.GetItem<AppState>(nameof(AppState));
+            AppState.SetStateFromStorage(storedState);
+        }
+        [JSInvokable("HandleOnOffLine")]
+        public void HandleOnOffLine(string status)
+        {
+            AppState.IsOnline = status == "online";
+            Console.WriteLine($"network status changed to {status}");
+        }
         private void HandleCodePropertyChanged(object sender, PropertyChangedEventArgs args)
         {
+            if (AppState.IsAuthUser) LocalStorage.SetItem($"{AppState.CurrentUser}_{nameof(AppState)}", AppState);
             if (args.PropertyName != "ProjectFiles" && args.PropertyName != "ActiveProject") return;
             ExtractedFiles = AppState.ProjectFiles;
-
             StateHasChanged();
         }
         
         public void Dispose()
         {
+            IndexObject.Dispose();
             AppState.PropertyChanged -= HandleCodePropertyChanged;
         }
     }

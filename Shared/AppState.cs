@@ -1,8 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
+using Blazored.LocalStorage;
 using Microsoft.CodeAnalysis;
+using Microsoft.JSInterop;
 
 namespace AppBuilder.Shared
 {
@@ -15,28 +19,54 @@ namespace AppBuilder.Shared
         private string _currentOutput;
         private ProjectFile _activeProjectFile;
         private UserProject _activeProject;
+        private bool _isOnline;
+        private List<UserProject> _userProjects;
+        private string _currentUser;
+
+        private bool _isAuthUser;
+        //ToDo Add User-Auth for Azure Static Blazor, Set IsAuthUser and CurrentUser
+        public string CurrentUser
+        {
+            get => _currentUser;
+            set { _currentUser = value; OnPropertyChanged(); }
+        }
+
+        public bool IsAuthUser
+        {
+            get => _isAuthUser;
+            set { _isAuthUser = value; OnPropertyChanged(); }
+        }
+        public List<UserProject> UserProjects
+        {
+            get => _userProjects;
+            set { _userProjects = value; OnPropertyChanged(); }
+        }
+
+        public bool IsOnline
+        {
+            get => _isOnline;
+            set { _isOnline = value; OnPropertyChanged(); }
+        }
 
         public string CodeSnippet
         {
-            get => _codeSnippet;
+            get => ActiveProjectFile?.Content ?? _codeSnippet;
             set { _codeSnippet = value; OnPropertyChanged(); }
         }
-
+        [JsonIgnore]
         public string Language
         {
             get
             {
                 if (ActiveProject == null) return _language;
+                if (ActiveProject.Name == null) return _language;
                 if (ActiveProjectFile.Name.EndsWith(".cs"))
                     return "csharp";
-                else if (ActiveProjectFile.Name.EndsWith(".razor"))
-                    return "razor";
-                else
-                    return _language;
+                return ActiveProjectFile.Name.EndsWith(".razor") ? "razor" : _language;
             }
             set { _language = value; OnPropertyChanged(); }
         }
-
+        [JsonIgnore]
         public List<MetadataReference> References
         {
             get => _references;
@@ -71,9 +101,13 @@ namespace AppBuilder.Shared
             ProjectFiles ??= new List<ProjectFile>();
             if (ProjectFiles.All(x => x.Name != projectFile.Name))
             {
-                ProjectFiles.Add(projectFile);
+                ProjectFiles?.Add(projectFile);
                 OnPropertyChanged(nameof(ProjectFiles));
                 return;
+            }
+            if (ActiveProject.Files.All(x => x.Name != projectFile.Name))
+            {
+                ActiveProject?.Files?.Add(projectFile);
             }
 
             foreach (var file in ProjectFiles.Where(file => file.Name == projectFile.Name))
@@ -84,13 +118,29 @@ namespace AppBuilder.Shared
         public void CreateProjectFile(string filename, string fileContent, FileType fileType)
         {
             Language = fileType == FileType.Class ? "csharp" : "razor";
-            CodeSnippet = fileContent;
+            //CodeSnippet = fileContent;
             ActiveProjectFile = new ProjectFile { Name = filename, Content = fileContent, FileType = fileType };
+            ActiveProject.Files.Add(ActiveProjectFile);
+            OnPropertyChanged(nameof(ActiveProject));
+        }
+
+        public void CreateProject(UserProject project)
+        {
+
         }
         public void ChangeFileName(string filename)
         {
             ActiveProjectFile.Name = filename;
             OnPropertyChanged(nameof(ActiveProjectFile));
+        }
+
+        public void SetStateFromStorage(AppState storedState)
+        {
+            ActiveProject = storedState.ActiveProject;
+            ActiveProjectFile = storedState.ActiveProjectFile;
+            CodeSnippet = storedState.CodeSnippet;
+            CurrentOutput = storedState.CurrentOutput;
+            ProjectFiles = storedState.ProjectFiles;
         }
         public bool HasActiveProject => ActiveProject != null || _activeProject != null;
         public event PropertyChangedEventHandler PropertyChanged;
@@ -98,6 +148,7 @@ namespace AppBuilder.Shared
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            // Console.WriteLine($"{propertyName} Changed");
         }
     }
 }
