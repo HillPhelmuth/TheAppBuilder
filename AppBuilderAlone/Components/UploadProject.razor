@@ -10,13 +10,18 @@
         public AppState AppState { get; set; }
         [Parameter]
         public EventCallback<List<ProjectFile>> OnProjectFileUpload { get; set; }
+        [Parameter]
+        public EventCallback<UserProject> OnProjectUpload { get; set; }
 
         private async Task OnInputFileChange(InputFileChangeEventArgs e)
         {
+            var projectName = e.File.Name;
             var bufferSize = 50 * 1024 * 1024;
             await using var stream = e.File.OpenReadStream(bufferSize);
             var projectFiles = await ZipService.ExtractFiles(stream);
+            var project = new UserProject {Name = projectName.Replace(".zip", string.Empty), Files = projectFiles};
             await OnProjectFileUpload.InvokeAsync(projectFiles);
+            await OnProjectUpload.InvokeAsync(project);
         }
 
     }

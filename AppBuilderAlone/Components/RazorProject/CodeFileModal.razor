@@ -1,8 +1,17 @@
 ﻿
-<MatH3>Available Files</MatH3>
 
-@foreach (var file in AppState.ProjectFiles ?? new List<ProjectFile>())
-{
-    <MatButton OnClick="@(() => UpdateActiveFile(file))">@file.Name</MatButton>
+<MatH4>Active Project Files</MatH4>
 
-}
+<MatList>
+    @foreach (var file in AppState.ProjectFiles ?? new List<ProjectFile>())
+    {
+        <MatListItem>
+            <MatButton Style="font-size:1.2rem" OnClick="@(() => UpdateActiveFile(file))">@file.Name</MatButton>
+            @if (file.Name != RazorConstants.DefaultComponentName && file.Name != ConsoleConstants.DefaultConsoleName)
+            {
+                <MatIconButton Icon="delete_forever" OnClick="@(async() => await DeleteFile(file))"></MatIconButton>
+            }
+        </MatListItem>
+
+    }
+</MatList>

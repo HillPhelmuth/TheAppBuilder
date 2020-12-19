@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="StaticAuth\**" />
+    <EmbeddedResource Remove="StaticAuth\**" />
+    <None Remove="StaticAuth\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Annotations.cs" />
     <Compile Remove="CodeSample.cs" />
   </ItemGroup>

@@ -5,10 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using AppBuilder.Client.Components;
 using AppBuilder.Client.Services;
+using AppBuilder.Client.StaticCustomAuth.Interfaces;
 using AppBuilder.CompileConsole;
 using AppBuilder.CompileRazor;
 using AppBuilder.Shared;
-using AppBuilder.Shared.StaticAuth.Interfaces;
 using Blazor.ModalDialog;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
@@ -24,9 +24,7 @@ namespace AppBuilder.Client.Pages
         [Inject]
         private IModalDialogService ModalService { get; set; }
         [Inject]
-        private GithubClient GithubClient { get; set; }
-        [Inject]
-        private ZipService ZipService { get; set; }
+        private IDependencyResolver DependencyResolver { get; set; }
         [Inject]
         private ConsoleCompile CompileService { get; set; }
         [Inject]
@@ -40,12 +38,18 @@ namespace AppBuilder.Client.Pages
         private RazorInterop RazorInterop => new(JsRuntime);
         private List<ProjectFile> ExtractedFiles { get; set; } = new();
         private DotNetObjectReference<Index> IndexObject;
-        private string orgName;
-        private string repoName;
-        private string fileName;
+        private string projectName;
+
+        private async Task SetAuthStateValues()
+        {
+            var authState = await AuthenticationState.GetAuthenticationStateAsync();
+           AppState.IsAuthUser = authState.User?.Identity?.IsAuthenticated ?? false;
+           AppState.CurrentUser = AppState.IsAuthUser ? authState.User?.Identity?.Name : "none";
+        }
 
         protected override async Task OnInitializedAsync()
         {
+            await SetAuthStateValues();
             AppState.PropertyChanged += HandleCodePropertyChanged;
             await base.OnInitializedAsync();
         }
@@ -53,17 +57,32 @@ namespace AppBuilder.Client.Pages
         {
             if (firstRender)
             {
-                await CompileService.InitAsync();
                 await RazorCompile.InitAsync();
+                await CompileService.InitAsync();
                 IndexObject = DotNetObjectReference.Create(this);
-                await RazorInterop.InitOnOffLine(IndexObject);
+                AppState.IsOnline = await RazorInterop.CheckOnlineStatus();
+                await RazorInterop.TrackOnlineStatus(IndexObject);
             }
             await base.OnAfterRenderAsync(firstRender);
         }
-        private void HandleProjectUpload(List<ProjectFile> projectFiles)
+
+        //private async Task TrySaveAssemblyRefsLocal()
+        //{
+        //    var assemblyStreams = await DependencyResolver.GetAssemblies();
+        //    Dictionary<string, byte[]> assembliesToCache = new Dictionary<string, byte[]>();
+        //    foreach (var assemb in assemblyStreams.Where(x => !x.Key.Contains("Reflection") && !x.Key.Contains("CodeAnalysis")).Distinct())
+        //    {
+        //        var bytes = await assemb.Value.ReadFully();
+        //        assembliesToCache.Add(assemb.Key, bytes);
+        //        LocalStorage.SetItem(assemb.Key, bytes);
+        //    }
+        //    //LocalStorage.SetItem("AssemblyRefs", assembliesToCache);
+        //}
+        private void HandleProjectUpload(UserProject project)
         {
-            AppState.ProjectFiles = projectFiles;
-            ExtractedFiles = projectFiles;
+            if (project?.Files == null) return;
+            AppState.ActiveProject = project;
+            AppState.ProjectFiles = project.Files;
         }
         private async Task ShowMenu()
         {
@@ -71,39 +90,23 @@ namespace AppBuilder.Client.Pages
             {
                 Style = "modal-dialog-appMenu",
             };
-            var result = await ModalService.ShowDialogAsync<AppMenu>("Action Menu", option);
-            if (!result.Success) return;
+            await ModalService.ShowDialogAsync<AppMenu>("Action Menu", option);
         }
-        private async Task DownloadRepo()
-        {
-            var inputForm = new ModalDataInputForm("Download Repo", "Provide the GitHub organization and repo name");
-            var orgField = inputForm.AddStringField("Org", "Org Name", "");
-            var repoField = inputForm.AddStringField("Repo", "Repo Name", "");
-            var filepathField = inputForm.AddStringField("File", "File path", "");
-
-            if (!await inputForm.ShowAsync(ModalService))
-                return;
-            orgName = orgField.Value;
-            repoName = repoField.Value;
-            fileName = filepathField.Value;
-            var apiResponse = await GithubClient.CodeFromPublicRepo(orgName, repoName, fileName);
-            ExtractedFiles = await ZipService.ExtractFiles(apiResponse);
-        }
-
         private void RecoverState()
         {
-            var storedState = LocalStorage.GetItem<AppState>(nameof(AppState));
+            var storedState = LocalStorage.GetItem<AppState>($"{AppState.CurrentUser}_{nameof(AppState)}");
             AppState.SetStateFromStorage(storedState);
         }
         [JSInvokable("HandleOnOffLine")]
         public void HandleOnOffLine(string status)
         {
             AppState.IsOnline = status == "online";
+            
             Console.WriteLine($"network status changed to {status}");
         }
         private void HandleCodePropertyChanged(object sender, PropertyChangedEventArgs args)
         {
-            if (AppState.IsAuthUser) LocalStorage.SetItem($"{AppState.CurrentUser}_{nameof(AppState)}", AppState);
+            if (AppState.IsAuthUser) LocalStorage.SetItem(nameof(AppState), AppState);
             if (args.PropertyName != "ProjectFiles" && args.PropertyName != "ActiveProject") return;
             ExtractedFiles = AppState.ProjectFiles;
             StateHasChanged();

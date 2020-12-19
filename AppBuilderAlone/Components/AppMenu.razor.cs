@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Blazored.LocalStorage;
+using AppBuilder.Client.StaticCustomAuth.Interfaces;
 
 namespace AppBuilder.Client.Components
 {
@@ -23,9 +25,12 @@ namespace AppBuilder.Client.Components
         protected IModalDialogService ModalService { get; set; }
         [Inject]
         public IJSRuntime JsRuntime { get; set; }
-        [Parameter]
-        public ProjectType ProjectType { get; set; }
-        private RazorInterop RazorInterop => new RazorInterop(JsRuntime);
+        [Inject]
+        private StorageClient StorageClient { get; set; }
+        [Inject]
+        private ISyncLocalStorageService LocalStorage { get; set; }
+
+        private RazorInterop RazorInterop => new(JsRuntime);
 
         private async Task DownloadProjectAsZip()
         {
@@ -80,14 +85,15 @@ namespace AppBuilder.Client.Components
             AppState.ActiveProject = new UserProject { Name = "SAMPLE", Files = sampleProjectFiles };
             AppState.ProjectFiles = sampleProjectFiles;
             AppState.ActiveProjectFile = sampleMain;
-            //AppState.CodeSnippet = sampleMain?.Content;
             ModalService.Close(true);
         }
-        private void HandleProjectUpload(List<ProjectFile> projectFiles)
+        private void HandleProjectUpload(UserProject project)
         {
-            AppState.ProjectFiles = projectFiles;
-            AppState.ActiveProjectFile = projectFiles.FirstOrDefault(x => x.Name == RazorConstants.DefaultComponentName || x.Name == ConsoleConstants.DefaultConsoleName);
-            AppState.ActiveProject.Files.AddRange(projectFiles);
+            if (project == null || project.Files == null) return;
+            AppState.ActiveProject = project;
+            AppState.ProjectFiles = project.Files;
+            AppState.ActiveProjectFile = project.Files.FirstOrDefault(x => x.Name == RazorConstants.DefaultComponentName || x.Name == ConsoleConstants.DefaultConsoleName);
+
             ModalService.Close(true);
         }
         protected async Task SelectActiveFile()
@@ -101,20 +107,25 @@ namespace AppBuilder.Client.Components
             var result = await ModalService.ShowDialogAsync<CodeFileModal>("Select a code snippet");
             if (result.Success)
             {
-                var codeFile = result.ReturnParameters.Get<ProjectFile>("ActiveCodeFile");
-                //isCSharp = codeFile.FileType == FileType.Class;
+                var action = result.ReturnParameters.Get("FileAction", "select");
+                if (action == "select")
+                {
+                    var codeFile = result.ReturnParameters.Get("ActiveCodeFile", AppState.ActiveProjectFile);
+                    AppState.ActiveProjectFile = codeFile;
+                }
+
+                if (action == "delete")
+                {
+                    var deletedFile = result.ReturnParameters.Get<ProjectFile>("DeletedCodeFile");
+                    AppState.ActiveProject.Files.Remove(deletedFile);
+                    AppState.ProjectFiles.Remove(deletedFile);
+                    if (AppState.ActiveProjectFile == deletedFile)
+                        AppState.ActiveProjectFile = AppState.ProjectFiles[0];
+                }
                 await InvokeAsync(StateHasChanged);
-                await Task.Delay(50);
-                AppState.ActiveProjectFile = codeFile;
-                //AppState.CodeSnippet = codeFile.Content;
+               
             }
             ModalService.Close(true);
-        }
-        private async Task SaveProject()
-        {
-            //if (!AppStateService.HasActiveProject) return;
-            //var projectFiles = AppStateService.ActiveProject;
-            //var apiResponse = await PublicClient.SaveCurrentFiles(projectFiles, AppStateService.UserName);
         }
         private async Task CreateProject()
         {
@@ -144,8 +155,37 @@ namespace AppBuilder.Client.Components
             AppState.ProjectFiles = newProject.Files;
             ModalService.Close(true);
         }
+
+        private async Task GetProjectsFromStorage()
+        {
+            if (!await AlertOffline()) return;
+            var username = AppState.CurrentUser;
+            var userProjects = await StorageClient.GetUserProjects(username);
+            var parameters = new ModalDialogParameters { { "ProjectNames", userProjects } };
+            var option = new ModalDialogOptions { Style = "modal-dialog-appMenu" };
+            var result = await ModalService.ShowDialogAsync<UserProjects>("User Projects", option, parameters);
+            if (!result.Success) return;
+            var selectedProject = result.ReturnParameters.Get<string>("SelectedProject", "none");
+            if (selectedProject == "none") return;
+            var userProject = await StorageClient.GetProject(username, selectedProject);
+            AppState.ActiveProject = userProject;
+            AppState.ProjectFiles = userProject.Files;
+            ModalService.Close(true);
+        }
+
+        private async Task SaveToCloud()
+        {
+            if (!AppState.HasActiveProject || !AppState.IsAuthUser) return;
+            if (!await AlertOffline()) return;
+            var username = AppState.CurrentUser;
+            var activeProject = AppState.ActiveProject;
+            var responseString = await StorageClient.UploadProject(username, activeProject);
+            Console.WriteLine($"Response from Upload Function:\r\n{responseString}");
+            ModalService.Close(true);
+        }
         protected async Task UpdateFromPublicRepo()
         {
+            if (!await AlertOffline()) return;
             var option = new ModalDialogOptions
             {
                 Style = "modal-dialog-githubform"
@@ -158,5 +198,21 @@ namespace AppBuilder.Client.Components
             ModalService.Close(true);
         }
 
+        private async Task<bool> AlertOffline()
+        {
+            if (AppState.IsOnline) return true;
+            LocalStorage.SetItem($"{AppState.CurrentUser}_{nameof(AppState)}", AppState);
+            var result = await ModalService.ShowMessageBoxAsync("Currently Offline",
+                 @"It looks like your network status is curently offline. Don't worry, your current project is saved to local storage. Try again when you're connected to the internet.
+
+Would you like to download your project files?", MessageBoxButtons.YesNo, MessageBoxDefaultButton.Button1);
+
+            if (result == MessageBoxDialogResult.Yes)
+            {
+                await DownloadProjectAsZip();
+            }
+
+            return false;
+        }
     }
 }

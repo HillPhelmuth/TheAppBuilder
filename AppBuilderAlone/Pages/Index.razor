@@ -1,13 +1,29 @@
 ﻿@page "/"
-
-<MatTabGroup>
+@layout MainLayout
+<AuthorizeView>
+    <Authorized>
+        <div style="margin-right:1rem">
+            Hello, @context.User.Identity.Name!
+            <a href="/.auth/logout?post_logout_redirect_uri=/" style="color: darkred"> Log out</a>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div style="margin-right:1rem">
+            <a href="/login-providers" style="color: darkblue">Log in</a>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+<MatTabGroup >
     <MatTab Label="Home">
-        <MatH1>App Builder</MatH1>
-        @*<MatButton OnClick="DownloadRepo" Label="Download Repo"></MatButton>*@
-        <UploadProject OnProjectFileUpload="HandleProjectUpload" />
+        <MatH2 Class="text-center">App Builder</MatH2>
+        <UploadProject OnProjectUpload="HandleProjectUpload" />
         <MatButton Raised="true" OnClick="RecoverState">Recover State</MatButton>
+        @*<MatButton OnClick="TrySaveAssemblyRefsLocal">Try Cache</MatButton>*@
         <div class="mat-layout-grid">
             <div class="mat-layout-grid-inner">
+                <div class="mat-layout-grid-cell mat-layout-grid-cell-span-12">
+                    <MatH5 Class="text-center">@projectName</MatH5>
+                </div>
                 @if (ExtractedFiles != null)
                 {
                     @foreach (var file in ExtractedFiles)
@@ -15,9 +31,7 @@
                         <div class="mat-layout-grid-cell mat-layout-grid-cell-span-4">
                             <div class="grid-card mat-elevation-z24">
                                 <div class="header">
-
                                     @file.Name
-
                                 </div>
                                 <div class="gridbody">
                                     <pre>@file.Content</pre>
@@ -31,14 +45,23 @@
             </div>
         </div>
     </MatTab>
-    <MatTab Label="Console Project">
-        <MatButton OnClick="ShowMenu" Icon="menu">Menu</MatButton>
-        <ConsoleHome />
-    </MatTab>
-    <MatTab Label="Blazor/Razor Project">
-        <MatButton OnClick="ShowMenu" Icon="menu">Menu</MatButton>
-        <RazorCodeHome />
-    </MatTab>
+    <AuthorizeView>
+        <Authorized>
+            <MatTab Label="Console Project">
+                <ConsoleHome />
+            </MatTab>
+            <MatTab Label="Blazor/Razor Project">
+                <RazorCodeHome />
+            </MatTab>
+        </Authorized>
+        <NotAuthorized>
+            <MatTab Label="Login">
+                <LoginProvider/>
+            </MatTab>
+        </NotAuthorized>
+    </AuthorizeView>
+   
+   
 </MatTabGroup>
 
 

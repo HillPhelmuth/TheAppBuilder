@@ -5,16 +5,10 @@
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
     <RootNamespace>AppBuilder.Client</RootNamespace>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Components\RazorProject\ProjectCrudModal.razor.cs" />
-    <Compile Remove="Services\RazorCompile.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Remove="Components\RazorProject\ProjectCrudModal.razor" />
-  </ItemGroup>
-
+  <PropertyGroup>
+    <BlazorWebAssemblyEnableLinking>false</BlazorWebAssemblyEnableLinking>
+  </PropertyGroup>
+  
   <ItemGroup>
     <None Include="Components\RazorProject\CodeFileModal.razor" />
     <None Include="Components\RazorProject\DefaultOutput.razor" />

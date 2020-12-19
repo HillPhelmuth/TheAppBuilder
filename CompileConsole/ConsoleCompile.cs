@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -15,11 +16,13 @@ namespace AppBuilder.CompileConsole
     public class ConsoleCompile
     {
         private readonly List<MetadataReference> _references = new();
-        private readonly IDependencyResolver _dependencyResolver;
-       
-        public ConsoleCompile(IDependencyResolver dependencyResolver)
+        private readonly AppState _appState;
+        private readonly HttpClient _httpClient;
+
+        public ConsoleCompile(AppState appState, HttpClient httpClient)
         {
-            _dependencyResolver = dependencyResolver;
+            _appState = appState;
+            _httpClient = httpClient;
         }
 
         public List<string> Logs { get; } = new();
@@ -28,7 +31,7 @@ namespace AppBuilder.CompileConsole
         {
             if (_references.Count == 0)
             {
-                _references.AddRange(await _dependencyResolver.GetAssemblies(true));
+                _references.AddRange(await GetAssemblies());
             }
             
         }
@@ -108,6 +111,34 @@ namespace AppBuilder.CompileConsole
             var output = writer.ToString();
             Console.SetOut(currentOut);
             return output;
+        }
+        public async Task<List<MetadataReference>> GetAssemblies()
+        {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(x => !x.IsDynamic)
+                .Select(x => x.GetName().Name)
+                .Union(new[]
+                {
+                    // Add any required dll that are not referenced in the Blazor application
+                    "System.Console",
+                    "System.Linq"
+                    //""
+                })
+                .Distinct()
+                .Where(x => !string.IsNullOrWhiteSpace(x) && !_appState.AssemblyNames.Contains(x))
+                .Select(x => $"_framework/{x}.dll");
+
+            var references = new List<MetadataReference>();
+
+            foreach (var assembly in assemblies)
+            {
+                // Download the assembly
+                references.Add(
+                    MetadataReference.CreateFromStream(
+                        await _httpClient.GetStreamAsync(assembly)));
+            }
+            references.AddRange(_appState.AssemblyReferences);
+            return references;
         }
     }
 }

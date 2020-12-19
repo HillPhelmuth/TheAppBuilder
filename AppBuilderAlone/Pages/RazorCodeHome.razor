@@ -1,17 +1,18 @@
 ﻿@page "/razorHome"
 @*@layout MainLayout*@
 <MatH4 Class="text-center">Build a project with Razor Components</MatH4>
-<MatButtonLink Href="/">Home</MatButtonLink>
+
 
 @if (isready)
 {
     <div class="mat-layout-grid">
         <div class="mat-layout-grid-inner">
             <div class="mat-layout-grid-cell mat-layout-grid-cell-span-12">
+                <MatButton OnClick="ShowMenu"><MatH5>Action Menu</MatH5></MatButton>
                 <MatButton OnClick="StartExecute" Raised="true">Execute Project</MatButton>
             </div>
             <div class="mat-layout-grid-cell mat-layout-grid-cell-span-6">
-                <MatTabBar ActiveChanged="HandleTabFileChange">
+                <MatTabBar  ActiveChanged="HandleTabFileChange">
                     @foreach (var file in AppState.ProjectFiles ?? new List<ProjectFile>())
                     {
 
@@ -19,13 +20,13 @@
                         </MatTabLabel>
                     }
                 </MatTabBar>
-                @if (isCSharp)
+                @if (AppState.Language == "csharp")
                 {
-                    <Editor ButtonLabel="Save to project" CodeSnippet="@AppState.CodeSnippet" Language="@AppState.Language" OnCodeSubmit="HandleSaveToProject" />
+                    <Editor ButtonLabel="Save to project" CodeSnippet="@AppState.CodeSnippet" Language="csharp" OnCodeSubmit="HandleSaveToProject" />
                 }
                 else
                 {
-                    <Editor ButtonLabel="Save to project" CodeSnippet="@AppState.CodeSnippet" Language="@AppState.Language" OnCodeSubmit="HandleSaveToProject" />
+                    <Editor ButtonLabel="Save to project" CodeSnippet="@AppState.CodeSnippet" Language="razor" OnCodeSubmit="HandleSaveToProject" />
                 }
 
             </div>

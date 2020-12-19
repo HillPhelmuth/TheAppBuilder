@@ -9,6 +9,7 @@
 </div>
 <MatDivider/>
 <MatButton Icon="input" OnClick="SubmitCode" Raised="true">@ButtonLabel</MatButton>
+<MatButton Style="font-size:80%;float:right" Icon="file_copy" OnClick="CopyToClipboard">Copy</MatButton>
 <div style="height:20rem">
     <MonacoEditor Id="console" CssClass="editor" @ref="MonacoEditor" ConstructionOptions="EditorOptionsRoslyn" OnDidInit="EditorOnDidInit" OnContextMenu="OnContextMenu">
     </MonacoEditor>

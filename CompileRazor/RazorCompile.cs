@@ -23,12 +23,12 @@ namespace AppBuilder.CompileRazor
     public class RazorCompile
     {
         private readonly AppState _appState;
-        private readonly IDependencyResolver _dependencyResolver;
+       
         private readonly HttpClient httpClient;
-        public RazorCompile(AppState appState, IDependencyResolver dependencyResolver, HttpClient httpClient)
+        public RazorCompile(AppState appState, HttpClient httpClient)
         {
             _appState = appState;
-            _dependencyResolver = dependencyResolver;
+          
             this.httpClient = httpClient;
         }
         private static CSharpCompilation _baseCompilation;
@@ -240,7 +240,8 @@ namespace AppBuilder.CompileRazor
                     .Any(n => n == a.Key))
                 .Select(a => a.Value)
                 .ToList();
-            _appState.References = _references.ToList();
+            _appState.AssemblyReferences = _references.ToList();
+            _appState.AssemblyNames = assemblyNames;
             _baseCompilation = CSharpCompilation.Create(
                 "Output",
                 Array.Empty<SyntaxTree>(),

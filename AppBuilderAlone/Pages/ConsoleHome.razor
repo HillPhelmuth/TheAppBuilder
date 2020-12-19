@@ -2,11 +2,10 @@
 <div class="mat-layout-grid">
     <div class="mat-layout-grid-inner">
         <div class="mat-layout-grid-cell mat-layout-grid-cell-span-12">
-            <MatButtonLink Href="/">Home</MatButtonLink>
-            <div style="float:right">
-                <MatTextField Label="Change File Name" @bind-Value="fileName"></MatTextField>
-                <MatButton OnClick="UpdateName">Update</MatButton>
-            </div>
+            <MatButton OnClick="ShowMenu">
+                <MatH5>Action Menu</MatH5>
+            </MatButton>
+            <MatButton OnClick="HandleCodeSubmit" Raised="true">Execute Project</MatButton>
         </div>
         <div class="mat-layout-grid-cell mat-layout-grid-cell-span-7">
             @if (isCodeCompiling)
@@ -25,7 +24,7 @@
                     </MatTabLabel>
                 }
             </MatTabBar>
-            <Editor ButtonLabel="Compile and Run" CodeSnippet="@AppState.CodeSnippet" Language="@AppState.Language" OnCodeSubmit="HandleCodeSubmit" OnSave="HandleSave" />
+            <Editor ButtonLabel="Save to project" CodeSnippet="@AppState.CodeSnippet" Language="@AppState.Language" OnCodeSubmit="HandleSave" OnSave="HandleSave" />
         </div>
         <div id="user-console-window-container" class="mat-layout-grid-cell mat-layout-grid-cell-span-5">
             <pre>@AppState.CurrentOutput</pre>

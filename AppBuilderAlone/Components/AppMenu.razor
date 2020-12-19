@@ -1,11 +1,21 @@
-﻿<MatH3>Menu</MatH3>
+﻿@if (AppState.IsAuthUser)
+{
+    <MatH6>Cloud Actions</MatH6>
+    <MatList>
+        <MatListItem>
+            <MatButton Raised="true" OnClick="GetProjectsFromStorage">Select Project From Cloud</MatButton>
+        </MatListItem>
+        <MatDivider></MatDivider>
+        <MatListItem>
+            <MatButton Raised="true" OnClick="SaveToCloud">Save Project To Cloud</MatButton>
+        </MatListItem>
+        <MatDivider></MatDivider>
+    </MatList>
+}
+<MatH6>Project Actions</MatH6>
 <MatList>
     <MatListItem>
         <MatButton Raised="true" OnClick="CreateProject">Create New Project</MatButton>
-    </MatListItem>
-    <MatDivider></MatDivider>
-    <MatListItem>
-        <MatButton Raised="true" OnClick="CreateFile">Create New File</MatButton>
     </MatListItem>
     <MatDivider></MatDivider>
     <MatListItem>
@@ -13,18 +23,25 @@
     </MatListItem>
     <MatDivider></MatDivider>
     <MatListItem>
-        <MatButton Raised="true" OnClick="SelectActiveFile">Select Project File</MatButton>
+        <MatButton Raised="true" OnClick="DownloadProjectAsZip">Download Project Files</MatButton>
     </MatListItem>
     <MatDivider></MatDivider>
     <MatListItem>
-        <MatButton Raised="true" OnClick="UpdateFromPublicRepo">Load From Public Github Repo</MatButton>
+        <UploadProject OnProjectUpload="HandleProjectUpload"/>
+    </MatListItem>
+</MatList>
+<MatH6>File Actions</MatH6>
+<MatList>
+    <MatListItem>
+        <MatButton Raised="true" OnClick="CreateFile">Add New File</MatButton>
     </MatListItem>
     <MatDivider></MatDivider>
     <MatListItem>
-        <MatButton Raised="true" OnClick="DownloadProjectAsZip">Download Project Zip</MatButton>
+        <MatButton Raised="true" OnClick="SelectActiveFile">Modify/Delete Project File</MatButton>
     </MatListItem>
     <MatDivider></MatDivider>
     <MatListItem>
-        <UploadProject OnProjectFileUpload="HandleProjectUpload"/>
+        <MatButton Raised="true" OnClick="UpdateFromPublicRepo">Load Content From Public Repo</MatButton>
     </MatListItem>
+    
 </MatList>

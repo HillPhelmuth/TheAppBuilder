@@ -22,6 +22,7 @@ namespace AppBuilder.Client
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddScoped<GithubClient>();
+            builder.Services.AddScoped<StorageClient>();
             builder.Services.AddMatBlazor();
             builder.Services.AddModalDialog();
             builder.Services.AddSharedServices();

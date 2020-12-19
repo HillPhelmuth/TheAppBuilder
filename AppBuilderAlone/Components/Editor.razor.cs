@@ -1,11 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using AppBuilder.Client.Services;
 using AppBuilder.CompileConsole;
 using AppBuilder.Shared;
 using BlazorMonaco;
 using BlazorMonaco.Bridge;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace AppBuilder.Client.Components
 {
@@ -13,6 +15,9 @@ namespace AppBuilder.Client.Components
     {
         [Inject]
         private AppState AppState { get; set; }
+        [Inject]
+        private IJSRuntime JsRuntime { get; set; }
+        private RazorInterop RazorInterop => new(JsRuntime);
         [Parameter]
         public string Language { get; set; }
         [Parameter]
@@ -61,57 +66,58 @@ namespace AppBuilder.Client.Components
         protected MonacoEditor MonacoEditor { get; set; }
         protected StandaloneEditorConstructionOptions EditorOptionsRoslyn(MonacoEditor editor)
         {
-            return new StandaloneEditorConstructionOptions
+            return new()
             {
                 AutomaticLayout = true,
                 AutoIndent = true,
-                //HighlightActiveIndentGuide = true,
                 ColorDecorators = true,
                 Minimap = new MinimapOptions { Enabled = false },
                 Hover = new HoverOptions { Delay = 400 },
                 Find = new FindOptions { AutoFindInSelection = true, SeedSearchStringFromSelection = true, AddExtraSpaceOnTop = true },
                 Lightbulb = new LightbulbOptions { Enabled = true },
                 AcceptSuggestionOnEnter = "smart",
-                Language = Language,
+                Language = Language ?? "csharp",
                 Value = AppState.ActiveProjectFile?.Content ?? ConsoleConstants.DefaultSnippet
             };
         }
 
         protected async Task EditorOnDidInit(MonacoEditorBase editor)
         {
-            await MonacoEditor.AddCommand((int)KeyMode.CtrlCmd | (int)KeyCode.KEY_H, (editor, keyCode) =>
+            await MonacoEditor.AddCommand((int)KeyMode.CtrlCmd | (int)KeyCode.KEY_H, (mEdit, keyCode) =>
             {
                 Console.WriteLine("Ctrl+H : Initial editor command is triggered.");
             });
-            await MonacoEditor.AddAction("saveAction", "Save Snippet", new int[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_D, (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_S }, null, null, "navigation", 1.5, async (editor, keyCodes) =>
+            await MonacoEditor.AddAction("saveAction", "Save Snippet", new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_D, (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_S }, null, null, "navigation", 1.5, async (mEdit,keyCodes) =>
             {
-                //await AddSnippetToUser();
+                
                 Console.WriteLine("Ctrl+D : Editor action is triggered.");
             });
-            await MonacoEditor.AddAction("executeAction", "Execute Code",
-                new int[] { (int)KeyMode.CtrlCmd | (int)KeyCode.Enter }, null, null, "navigation", 2.5,
-                async (editor, keyCodes) =>
+            await MonacoEditor.AddAction("executeAction", "Execute (ctrl + enter)",
+                new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.Enter }, null, null, "navigation", 2.5,
+                async (mEdit, keyCodes) =>
                 {
                     await SubmitCode();
                     Console.WriteLine("Code Executed from Editor Command");
                 });
-
+            await MonacoEditor.AddAction("copyAction", "Copy to clipboard (ctrl + c)",
+                new[] {(int) KeyMode.CtrlCmd | (int) KeyCode.KEY_D}, null, null, "navigation", 3.5,
+                async (mEdit, keyCodes) => await CopyToClipboard());
             await MonacoEditor.SetValue(AppState.CodeSnippet);
-            var newDecorations = new[]
-            {
-                new ModelDeltaDecoration
-                {
-                    Range = new BlazorMonaco.Bridge.Range(3,1,3,1),
-                    Options = new ModelDecorationOptions
-                    {
-                        IsWholeLine = false,
-                        ClassName = "decorationContentClass",
-                        GlyphMarginClassName = "decorationGlyphMarginClass"
-                    }
-                }
-            };
+            //var newDecorations = new[]
+            //{
+            //    new ModelDeltaDecoration
+            //    {
+            //        Range = new BlazorMonaco.Bridge.Range(3,1,3,1),
+            //        Options = new ModelDecorationOptions
+            //        {
+            //            IsWholeLine = false,
+            //            ClassName = "decorationContentClass",
+            //            GlyphMarginClassName = "decorationGlyphMarginClass"
+            //        }
+            //    }
+            //};
 
-            decorationIds = await MonacoEditor.DeltaDecorations(null, newDecorations);
+            //decorationIds = await MonacoEditor.DeltaDecorations(null, newDecorations);
         }
         private string[] decorationIds;
 
@@ -123,6 +129,13 @@ namespace AppBuilder.Client.Components
         {
             Console.WriteLine($"setting theme to: {e.Value}");
             await MonacoEditorBase.SetTheme(e.Value?.ToString());
+        }
+
+        private async Task CopyToClipboard()
+        {
+            var text = await MonacoEditor.GetValue();
+            Console.WriteLine($"Text copied to ClipBoard:\r\n{text}");
+            await RazorInterop.CopyToClipboard(text);
         }
         #endregion
     }

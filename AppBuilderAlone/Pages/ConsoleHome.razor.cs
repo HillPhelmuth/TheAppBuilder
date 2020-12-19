@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Transactions;
+using AppBuilder.Client.Components;
 using AppBuilder.CompileConsole;
 using AppBuilder.CompileRazor;
 using AppBuilder.Shared;
@@ -46,26 +47,34 @@ namespace AppBuilder.Client.Pages
             if (firstRender)
             {
                 AppState.ActiveProjectFile ??= activeFile;
-                //AppState.CodeSnippet = ConsoleConstants.DefaultSnippet;
-
-                //await JsRuntime.RazorAppInit(dotNetInstance);
             }
             await base.OnAfterRenderAsync(firstRender);
         }
-        private void HandleCodeSubmit(string code)
+        private void HandleCodeSubmit()
         {
             isCodeCompiling = true;
             StateHasChanged();
-            _ = CodeSubmit(code);
+            _ = CodeSubmit();
         }
-        private async Task CodeSubmit(string code)
+        private async Task ShowMenu()
+        {
+            var option = new ModalDialogOptions
+            {
+                Style = "modal-dialog-appMenu",
+            };
+            var result = await ModalService.ShowDialogAsync<AppMenu>("Action Menu", option);
+        }
+        private async Task CodeSubmit()
         {
             activeFile ??= new ProjectFile { Name = fileName, FileType = FileType.Class };
-            AppState.ActiveProjectFile.Content = code;
             AppState.SaveCode(AppState.ActiveProjectFile);
-            activeFile.Content = code;
-            await Task.Delay(50);
-            AppState.CurrentOutput = await CompileService.CompileAndRun(AppState.ProjectFiles.ToArray());
+            List<ProjectFile> tempFiles = new();
+            foreach (var file in AppState.ProjectFiles)
+            {
+                tempFiles.Add(new ProjectFile{Name = file.Name, Content = await ReplaceConsoleInput(file.Content)});
+            }
+            await Task.Delay(20);
+            AppState.CurrentOutput = await CompileService.CompileAndRun(tempFiles.ToArray());
             isCodeCompiling = false;
             await InvokeAsync(StateHasChanged);
         }
@@ -79,13 +88,41 @@ namespace AppBuilder.Client.Pages
 
             AppState.ActiveProject.Files = AppState.ProjectFiles;
         }
-        private void UpdateName()
-        {
-            AppState.ChangeFileName(fileName);
-        }
+        
         private void HandleTabFileChange(BaseMatTabLabel baseMatTab)
         {
             AppState.ActiveProjectFile = AppState.ProjectFiles.FirstOrDefault(x => x.Name == baseMatTab.Id);
+        }
+        private async Task<string> ReplaceConsoleInput(string codeInput)
+        {
+            var tempCode = codeInput;
+            var inputDictionary = new Dictionary<int, DataInputFormStringField>();
+            var readLineIndexes = tempCode.AllIndexesOf(ReadlinePattern);
+            var regex = new Regex(Regex.Escape(ReadlinePattern));
+            var inputForm = new ModalDataInputForm("User Inputs", "User console input");
+
+            for (int i = 1; i <= readLineIndexes.Count; i++)
+            {
+                string userInput = "";
+                var inputField1 =
+                    inputForm.AddStringField($"Input{i}", $"{ReadlinePattern} {i}", userInput, "The user's input.");
+                inputDictionary.Add(i, inputField1);
+            }
+
+            if (await inputForm.ShowAsync(ModalService))
+            {
+                int j = 1;
+                tempCode = regex.Replace(tempCode, m =>
+                {
+                    var input = inputDictionary[j].Value;
+                    Console.WriteLine($"Console.ReadLine() replaced with \"{input}\"");
+                    j++;
+                    return $"\"{input}\"";
+                });
+            }
+
+            var code = tempCode;
+            return code;
         }
         private void HandleCodePropertyChanged(object sender, PropertyChangedEventArgs args)
         {

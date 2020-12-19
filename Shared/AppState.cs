@@ -15,15 +15,16 @@ namespace AppBuilder.Shared
         private string _codeSnippet;
         private string _language;
         private List<ProjectFile> _projectFiles;
-        private List<MetadataReference> _references;
+        private List<MetadataReference> _assemblyReferences;
         private string _currentOutput;
         private ProjectFile _activeProjectFile;
         private UserProject _activeProject;
         private bool _isOnline;
         private List<UserProject> _userProjects;
         private string _currentUser;
-
         private bool _isAuthUser;
+        private List<string> _assemblyNames;
+
         //ToDo Add User-Auth for Azure Static Blazor, Set IsAuthUser and CurrentUser
         public string CurrentUser
         {
@@ -67,10 +68,16 @@ namespace AppBuilder.Shared
             set { _language = value; OnPropertyChanged(); }
         }
         [JsonIgnore]
-        public List<MetadataReference> References
+        public List<MetadataReference> AssemblyReferences
         {
-            get => _references;
-            set { _references = value; OnPropertyChanged(); }
+            get => _assemblyReferences;
+            set { _assemblyReferences = value; OnPropertyChanged(); }
+        }
+
+        public List<string> AssemblyNames
+        {
+            get => _assemblyNames;
+            set { _assemblyNames = value; OnPropertyChanged(); }
         }
 
         public List<ProjectFile> ProjectFiles

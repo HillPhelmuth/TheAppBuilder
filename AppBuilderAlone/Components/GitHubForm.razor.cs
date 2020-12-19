@@ -17,7 +17,7 @@ namespace AppBuilder.Client.Components
         public IModalDialogService ModalService { get; set; }
         [Inject]
         public GithubClient GithubClient { get; set; }
-        public GitHubFormModel FormModel { get; set; } = new GitHubFormModel();
+        public GitHubFormModel FormModel { get; set; } = new();
 
         private async Task Submit()
         {

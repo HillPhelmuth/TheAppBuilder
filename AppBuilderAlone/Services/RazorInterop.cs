@@ -13,7 +13,7 @@ namespace AppBuilder.Client.Services
 
         public RazorInterop(IJSRuntime jsRuntime)
         {
-            moduleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>(
+            moduleTask = new Lazy<Task<IJSObjectReference>>(() => jsRuntime.InvokeAsync<IJSObjectReference>(
                 "import", "./js/razorApp.js").AsTask());
         }
 
@@ -36,10 +36,16 @@ namespace AppBuilder.Client.Services
             await module.InvokeVoidAsync("saveAsFile", filename, projectBytes);
         }
 
-        public async ValueTask InitOnOffLine(DotNetObjectReference<Index> objRef)
+        public async ValueTask TrackOnlineStatus(DotNetObjectReference<Index> objRef)
         {
             var module = await moduleTask.Value;
             await module.InvokeVoidAsync("initOnOffLine", objRef);
+        }
+
+        public async ValueTask<bool> CheckOnlineStatus()
+        {
+            var module = await moduleTask.Value;
+            return await module.InvokeAsync<bool>("checkOnline");
         }
         public async ValueTask CopyToClipboard(string text)
         {

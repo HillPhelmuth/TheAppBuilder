@@ -28,28 +28,21 @@ namespace AppBuilder.Client.Pages
         public RazorCompile RazorCompile { get; set; }
         [Inject]
         protected IModalDialogService ModalService { get; set; }
-        private RazorInterop RazorInterop => new RazorInterop(JsRuntime);
-
-        //private const string MainComponentCodePrefix = "@page \"/__razorOutput\"\n";
-        //private const string MainUserPagePath = "/__razorOutput";
-        public const string MainComponentFilePath = "__RazorOutput.razor";
-        public List<ProjectFile> Files { get; set; } = new List<ProjectFile>();
+        private RazorInterop RazorInterop => new(JsRuntime);
+        public List<ProjectFile> Files { get; set; } = new();
         private DotNetObjectReference<RazorCodeHome> dotNetInstance;
         private string language = "razor";
         private bool isready;
         private static string sampleSnippet = CodeSnippets.RazorSnippet;
 
-        private List<string> Diagnostics { get; set; } = new List<string>();
+        private List<string> Diagnostics { get; set; } = new();
         private bool isCodeCompiling;
         private bool isCSharp;
         private string buttonCss = "";
         protected override async Task OnInitializedAsync()
         {
             //AppState.CodeSnippet = sampleSnippet;
-            var mainCodeFile = new ProjectFile { Name = MainComponentFilePath, Content = sampleSnippet, FileType = FileType.Razor };
-            AppState.ActiveProjectFile = mainCodeFile;
-           
-            AppState.ActiveProject ??= new UserProject { Name = "DefaultProject", Files = new List<ProjectFile> { mainCodeFile } };
+            
             await Task.Delay(50);
             await RazorCompile.InitAsync();
             AppState.PropertyChanged += HandleCodePropertyChanged;
@@ -61,7 +54,10 @@ namespace AppBuilder.Client.Pages
         {
             if (firstRender)
             {
-                AppState.ActiveProjectFile ??= new ProjectFile { Name = MainComponentFilePath, Content = sampleSnippet, FileType = FileType.Razor };
+                var mainCodeFile = new ProjectFile { Name = RazorConstants.DefaultComponentName, Content = sampleSnippet, FileType = FileType.Razor };
+                AppState.ActiveProjectFile = mainCodeFile;
+
+                AppState.ActiveProject ??= new UserProject { Name = "DefaultProject", Files = new List<ProjectFile> { mainCodeFile } };
                 //AppState.CodeSnippet = sampleSnippet;
                 dotNetInstance = DotNetObjectReference.Create(this);
                 await RazorInterop.RazorAppInit(dotNetInstance);
@@ -108,17 +104,7 @@ namespace AppBuilder.Client.Pages
             AppState.ProjectFiles = codeFiles.UnPagifyMainComponent(originalMainComponentContent);
             await InvokeAsync(StateHasChanged);
         }
-        protected async Task UpdateFromPublicRepo()
-        {
-            var option = new ModalDialogOptions
-            {
-                Style = "modal-dialog-githubform"
-            };
-            var result = await ModalService.ShowDialogAsync<GitHubForm>("Get code from a public Github Repo", option);
-            if (!result.Success) return;
-            string code = result.ReturnParameters.Get<string>("FileCode");
-            AppState.CodeSnippet = code;
-        }
+       
         private void HandleTabFileChange(BaseMatTabLabel baseMatTab)
         {
             AppState.ActiveProjectFile = AppState.ProjectFiles.FirstOrDefault(x => x.Name == baseMatTab.Id);
@@ -147,7 +133,14 @@ namespace AppBuilder.Client.Pages
         public async void ShowCacheError() =>
             await ModalService.ShowMessageBoxAsync("Project Not Found",
                 "Hmm... It appears that the project is longer in your browser cache. I blame you, but perhaps refreshing the app and trying again will resolve it.");
-
+        private async Task ShowMenu()
+        {
+            var option = new ModalDialogOptions
+            {
+                Style = "modal-dialog-appMenu",
+            };
+            var result = await ModalService.ShowDialogAsync<AppMenu>("Action Menu", option);
+        }
         public void Dispose()
         {
             dotNetInstance?.Dispose();

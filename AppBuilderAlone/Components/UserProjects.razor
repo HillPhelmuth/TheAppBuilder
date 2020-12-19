@@ -1,0 +1,27 @@
+﻿@inject IModalDialogService ModalDialog
+<MatH3>Select Project</MatH3>
+<MatList>
+    @foreach (var projectName in ProjectNames)
+    {
+        <MatListItem>
+            <MatButton OnClick="@(() => Submit(projectName))">@projectName</MatButton>
+        </MatListItem>
+        <MatDivider></MatDivider>
+    }
+
+</MatList>
+@code {
+
+    [Parameter]
+    public List<string> ProjectNames { get; set; } = new();
+
+    private void Submit(string projectName)
+    {
+        var parameters = new ModalDialogParameters
+        {
+            {"SelectedProject", projectName }
+        };
+        ModalDialog.Close(true,parameters);
+    }
+
+}

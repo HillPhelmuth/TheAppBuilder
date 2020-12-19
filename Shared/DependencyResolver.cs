@@ -16,9 +16,7 @@ namespace AppBuilder.Shared
 {
     public interface IDependencyResolver
     {
-        //Task<List<MetadataReference>> GetAssemblies();
-        Task<IEnumerable<MetadataReference>> GetAssemblies();
-        Task<List<MetadataReference>> GetAssemblies(bool isConsole);
+        Task<IDictionary<string, Stream>> GetAssemblies();
     }
 
     public class DependencyResolver : IDependencyResolver
@@ -30,7 +28,7 @@ namespace AppBuilder.Shared
             _http = http;
         }
 
-        public async Task<List<MetadataReference>> GetAssemblies(bool isConsole)
+        public async Task<List<MetadataReference>> GetAssemblies(bool isConsole, List<string> loadedAssemblies)
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(x => !x.IsDynamic)
@@ -58,7 +56,7 @@ namespace AppBuilder.Shared
 
             return references;
         }
-        public async Task<IEnumerable<MetadataReference>> GetAssemblies()
+        public async Task<IDictionary<string, Stream>> GetAssemblies()
         {
             HttpClient httpClient = _http;
             var assemblies = AppDomain.CurrentDomain.GetAssemblies()
@@ -94,15 +92,15 @@ namespace AppBuilder.Shared
                 .ToList();
 
             var assemblyStreams = await GetAssemblyStreams(httpClient, assemblyNames);
+            return assemblyStreams;
+            //Dictionary<string, PortableExecutableReference> allReferenceAssemblies = assemblyStreams.ToDictionary(a => a.Key, a => MetadataReference.CreateFromStream(a.Value));
 
-            Dictionary<string, PortableExecutableReference> allReferenceAssemblies = assemblyStreams.ToDictionary(a => a.Key, a => MetadataReference.CreateFromStream(a.Value));
-
-            return allReferenceAssemblies
-                .Where(a => basicReferenceAssemblyRoots
-                    .Select(x => x.GetName().Name)
-                    .Union(basicReferenceAssemblyRoots.SelectMany(y => y.GetReferencedAssemblies().Select(z => z.Name)))
-                    .Any(n => n == a.Key))
-                .Select(a => a.Value);
+            //return allReferenceAssemblies
+            //    .Where(a => basicReferenceAssemblyRoots
+            //        .Select(x => x.GetName().Name)
+            //        .Union(basicReferenceAssemblyRoots.SelectMany(y => y.GetReferencedAssemblies().Select(z => z.Name)))
+            //        .Any(n => n == a.Key))
+            //    .Select(a => a.Value);
         }
         private static async Task<IDictionary<string, Stream>> GetAssemblyStreams(HttpClient httpClient, IEnumerable<string> assemblyNames)
         {

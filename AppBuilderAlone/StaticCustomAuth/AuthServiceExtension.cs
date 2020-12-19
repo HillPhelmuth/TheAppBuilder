@@ -1,3 +1,4 @@
+using AppBuilder.Client.StaticCustomAuth.Interfaces;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,7 +10,8 @@ namespace AppBuilder.Client.StaticCustomAuth
         {
             return services
                 .AddAuthorizationCore()
-                .AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+                .AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>()
+                .AddScoped<ICustomAuthenticationStateProvider, CustomAuthenticationStateProvider>();
         }
     }
 }
