@@ -33,14 +33,7 @@ namespace AppBuilder.CompileRazor
         }
         private static CSharpCompilation _baseCompilation;
         private IEnumerable<MetadataReference> _references;
-        private const string DefaultImports = @"@using System.ComponentModel.DataAnnotations
-@using System.Linq
-@using System.Net.Http
-@using System.Net.Http.Json
-@using Microsoft.AspNetCore.Components.Forms
-@using Microsoft.AspNetCore.Components.Routing
-@using Microsoft.AspNetCore.Components.Web
-@using Microsoft.JSInterop";
+
         public const string DefaultRootNamespace = "AppBuilder.Output";
 
         private const string WorkingDirectory = "/BlazorOut/";
@@ -50,7 +43,7 @@ namespace AppBuilder.CompileRazor
             "Blazor",
             extensions: Array.Empty<RazorExtension>());
 
-        public async Task<CodeAssemblyModel> CompileToAssemblyAsync(ICollection<ProjectFile> codeFiles, string preset = "basic")
+        public async Task<CodeAssemblyModel> CompileToAssemblyAsync(ICollection<ProjectFile> codeFiles)
         {
             Console.WriteLine($"CompileToAssemblyAsync: {string.Join("\r\n", codeFiles.Select(x => x.Name))}");
             if (codeFiles == null)
@@ -59,10 +52,7 @@ namespace AppBuilder.CompileRazor
             }
 
             var cSharpResults = await ConvertRazorToCSharp(codeFiles);
-
-            //await (updateStatusFunc?.Invoke("Compiling Assembly") ?? Task.CompletedTask);
             var result = GetCodeAssembly(new List<RazorToCSharpModel>(cSharpResults));
-
             return result;
         }
 
@@ -133,8 +123,7 @@ namespace AppBuilder.CompileRazor
         private CodeAssemblyModel GetCodeAssembly(ICollection<RazorToCSharpModel> cSharpResults)
         {
             Console.WriteLine($"GetCodeAssembly: {string.Join("\r\n", cSharpResults.Select(x => x.Code))}");
-            //return new CodeAssemblyModel();
-            var cSharpParseOptions = new CSharpParseOptions(LanguageVersion.Preview);
+           var cSharpParseOptions = new CSharpParseOptions(LanguageVersion.Preview);
 
             if (cSharpResults.Any(r => r.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error)))
             {
@@ -176,7 +165,7 @@ namespace AppBuilder.CompileRazor
             return RazorProjectEngine.Create(_config, _fileSystem, builder =>
             {
                 builder.SetRootNamespace(DefaultRootNamespace);
-                builder.AddDefaultImports(DefaultImports);
+                builder.AddDefaultImports(RazorConstants.DefaultUsings);
 
                 // Features that use Roslyn are mandatory for components
                 CompilerFeatures.Register(builder);
