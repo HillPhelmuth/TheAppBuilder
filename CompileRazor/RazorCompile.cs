@@ -47,7 +47,7 @@ namespace AppBuilder.CompileRazor
         private readonly RazorProjectFileSystem _fileSystem = new WebRazorProjectFileSystem();
         private readonly RazorConfiguration _config = RazorConfiguration.Create(
             RazorLanguageVersion.Latest,
-            configurationName: "Blazor",
+            "Blazor",
             extensions: Array.Empty<RazorExtension>());
 
         public async Task<CodeAssemblyModel> CompileToAssemblyAsync(ICollection<ProjectFile> codeFiles, string preset = "basic")
@@ -246,7 +246,9 @@ namespace AppBuilder.CompileRazor
                 "Output",
                 Array.Empty<SyntaxTree>(),
                 _references,
-                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, 
+                    optimizationLevel: OptimizationLevel.Release,
+                    concurrentBuild: false));
         }
         private static async Task<IDictionary<string, Stream>> GetAssemblyStreams(HttpClient httpClient, IEnumerable<string> assemblyNames)
         {
