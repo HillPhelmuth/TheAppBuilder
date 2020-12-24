@@ -22,7 +22,7 @@ async function onInstall(event) {
     const noCheckRequests = self.assetsManifest.assets
         .filter(asset => noHashCheckInclude.some(pattern => pattern.test(asset.url)))
         .map(asset => new Request(asset.url));
-    await caches.open(cacheName).then(cache => cache.addAll(assetsRequests) && cache.addAll(noCheckRequests));
+    await caches.open(cacheName).then(cache => cache.addAll(assetsRequests.concat(noCheckRequests)));
 }
 
 async function onActivate(event) {
