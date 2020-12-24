@@ -95,7 +95,7 @@ namespace AppBuilder.CompileConsole
         public string Run(Assembly assembly)
         {
             if (assembly == null)
-                return "Must have been some sort of fuck-up";
+                return $"Must have been some sort of fuck-up\r\n{string.Join(",", Logs)}";
             // Capture the Console outputs.
             var currentOut = Console.Out;
             var writer = new StringWriter();
@@ -114,6 +114,7 @@ namespace AppBuilder.CompileConsole
         }
         public async Task<List<MetadataReference>> GetAssemblies()
         {
+            if (_appState.AssemblyReferences?.Count > 0) return _appState.AssemblyReferences;
             var assemblies = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(x => !x.IsDynamic)
                 .Select(x => x.GetName().Name)
@@ -137,6 +138,8 @@ namespace AppBuilder.CompileConsole
                     MetadataReference.CreateFromStream(
                         await _httpClient.GetStreamAsync(assembly)));
             }
+
+            _appState.AssemblyReferences ??= references;
             references.AddRange(_appState.AssemblyReferences);
             return references;
         }

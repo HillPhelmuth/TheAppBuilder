@@ -18,8 +18,8 @@ using Microsoft.JSInterop;
 
 namespace AppBuilder.Client.Pages
 {
-    public partial class RazorCodeHome : IDisposable
-    {       
+    public partial class RazorCodeHome : ComponentBase, IDisposable
+    {
         [Inject]
         public AppState AppState { get; set; }
         [Inject]
@@ -47,7 +47,7 @@ namespace AppBuilder.Client.Pages
             //AppState.CodeSnippet = sampleSnippet;
             iframeSrc = NavigationManager.BaseUri.ToString() + "/defaultOutput";
             await Task.Delay(50);
-            await RazorCompile.InitAsync();
+            //await RazorCompile.InitAsync();
             AppState.PropertyChanged += HandleCodePropertyChanged;
             isready = true;
             await base.OnInitializedAsync();
@@ -69,6 +69,22 @@ namespace AppBuilder.Client.Pages
             await base.OnAfterRenderAsync(firstRender);
         }
 
+        private async Task SetFullScreen()
+        {
+            if (!RazorCompile.IsSuccess)
+            {
+                var alertResult = await ModalService.ShowMessageBoxAsync("Output",
+                    "You did not create and compile a valid Razor project to display. Do better!");
+                return;
+            }
+            var option = new ModalDialogOptions
+            {
+                Style = "modal-dialog-output",
+            };
+            var result = await ModalService.ShowDialogAsync<RazorSamplesModal>("Project output", option);
+
+
+        }
         private void HandleSaveToProject(string content)
         {
             AppState.ActiveProjectFile.Content = content;
@@ -108,19 +124,19 @@ namespace AppBuilder.Client.Pages
             AppState.ProjectFiles = codeFiles.UnPagifyMainComponent(originalMainComponentContent);
             await InvokeAsync(StateHasChanged);
         }
-       
+
         private void HandleTabFileChange(BaseMatTabLabel baseMatTab)
         {
             AppState.ActiveProjectFile = AppState.ProjectFiles.FirstOrDefault(x => x.Name == baseMatTab.Id);
         }
         private void HandleCodePropertyChanged(object sender, PropertyChangedEventArgs args)
         {
-            if (args.PropertyName !=nameof(AppState.ActiveProjectFile) && args.PropertyName != nameof(AppState.ActiveProject)) return;
+            if (args.PropertyName != nameof(AppState.ActiveProjectFile) && args.PropertyName != nameof(AppState.ActiveProject)) return;
             //AppState.CodeSnippet = AppState.ActiveProjectFile.Content;
             AppState.ProjectFiles = AppState.ActiveProject.Files;
             StateHasChanged();
         }
-        
+
         private async Task ShowDiags()
         {
             buttonCss = "";

@@ -56,7 +56,7 @@ namespace AppBuilder.Client.Pages
             if (firstRender)
             {
                 await RazorCompile.InitAsync();
-                await CompileService.InitAsync();
+                //await CompileService.InitAsync();
                 IndexObject = DotNetObjectReference.Create(this);
                 AppState.IsOnline = await RazorInterop.CheckOnlineStatus();
                 await RazorInterop.TrackOnlineStatus(IndexObject);

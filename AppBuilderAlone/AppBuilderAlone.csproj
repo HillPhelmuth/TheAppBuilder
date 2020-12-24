@@ -6,12 +6,16 @@
     <PublishTrimmed>false</PublishTrimmed>
     <RootNamespace>AppBuilder.Client</RootNamespace>
   </PropertyGroup>
-  
-  
+
   <ItemGroup>
-    <None Include="Components\RazorProject\CodeFileModal.razor" />
-    <None Include="Components\RazorProject\DefaultOutput.razor" />
-    <None Include="Components\RazorProject\RazorSamplesModal.razor" />
+    <Content Remove="wwwroot\routes.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\routes.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

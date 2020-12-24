@@ -1,6 +1,4 @@
-﻿<div>
-    @*@foreach (var codeSamplePair in CodeSnippets.RazorSnippets)
-    {
-        <MatButton OnClick="@(() => UpdateActiveFile(codeSamplePair))">@codeSamplePair.Key</MatButton>
-    }*@
+﻿
+<div class="mat-elevation-z22" style="margin-left:6vw; margin-right: 6vw; height:90vh; width: 75vw; max-height:90vh; overflow-y: scroll; overflow-x:auto">
+    <iframe style="height:100%;width:100%" src="@RazorConstants.MainComponentPagePath"></iframe>
 </div>

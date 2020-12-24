@@ -1,6 +1,11 @@
 {
   "routes": [
     {
+      "route": "/__razorOutput",
+      "serve": "/output.html",
+      "statusCode": 200 
+    },
+    {
       "route": "/*",
       "serve": "/index.html",
       "statusCode": 200
