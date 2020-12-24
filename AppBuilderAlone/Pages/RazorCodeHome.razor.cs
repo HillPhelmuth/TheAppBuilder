@@ -28,6 +28,8 @@ namespace AppBuilder.Client.Pages
         public RazorCompile RazorCompile { get; set; }
         [Inject]
         protected IModalDialogService ModalService { get; set; }
+        [Inject]
+        private NavigationManager NavigationManager { get; set; }
         private RazorInterop RazorInterop => new(JsRuntime);
         public List<ProjectFile> Files { get; set; } = new();
         private DotNetObjectReference<RazorCodeHome> dotNetInstance;
@@ -39,10 +41,11 @@ namespace AppBuilder.Client.Pages
         private bool isCodeCompiling;
         private bool isCSharp;
         private string buttonCss = "";
+        private string iframeSrc;
         protected override async Task OnInitializedAsync()
         {
             //AppState.CodeSnippet = sampleSnippet;
-            
+            iframeSrc = NavigationManager.BaseUri.ToString() + "/defaultOutput";
             await Task.Delay(50);
             await RazorCompile.InitAsync();
             AppState.PropertyChanged += HandleCodePropertyChanged;
@@ -62,6 +65,7 @@ namespace AppBuilder.Client.Pages
                 dotNetInstance = DotNetObjectReference.Create(this);
                 await RazorInterop.RazorAppInit(dotNetInstance);
             }
+            Console.WriteLine("RazorCodeHome Renders");
             await base.OnAfterRenderAsync(firstRender);
         }
 

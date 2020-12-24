@@ -24,8 +24,6 @@ namespace AppBuilder.Client.Pages
         [Inject]
         private IModalDialogService ModalService { get; set; }
         [Inject]
-        private IDependencyResolver DependencyResolver { get; set; }
-        [Inject]
         private ConsoleCompile CompileService { get; set; }
         [Inject]
         private RazorCompile RazorCompile { get; set; }
@@ -63,35 +61,17 @@ namespace AppBuilder.Client.Pages
                 AppState.IsOnline = await RazorInterop.CheckOnlineStatus();
                 await RazorInterop.TrackOnlineStatus(IndexObject);
             }
+            Console.WriteLine("Index Renders");
             await base.OnAfterRenderAsync(firstRender);
         }
 
-        //private async Task TrySaveAssemblyRefsLocal()
-        //{
-        //    var assemblyStreams = await DependencyResolver.GetAssemblies();
-        //    Dictionary<string, byte[]> assembliesToCache = new Dictionary<string, byte[]>();
-        //    foreach (var assemb in assemblyStreams.Where(x => !x.Key.Contains("Reflection") && !x.Key.Contains("CodeAnalysis")).Distinct())
-        //    {
-        //        var bytes = await assemb.Value.ReadFully();
-        //        assembliesToCache.Add(assemb.Key, bytes);
-        //        LocalStorage.SetItem(assemb.Key, bytes);
-        //    }
-        //    //LocalStorage.SetItem("AssemblyRefs", assembliesToCache);
-        //}
         private void HandleProjectUpload(UserProject project)
         {
             if (project?.Files == null) return;
             AppState.ActiveProject = project;
             AppState.ProjectFiles = project.Files;
         }
-        private async Task ShowMenu()
-        {
-            var option = new ModalDialogOptions
-            {
-                Style = "modal-dialog-appMenu",
-            };
-            await ModalService.ShowDialogAsync<AppMenu>("Action Menu", option);
-        }
+      
         private void RecoverState()
         {
             var storedState = LocalStorage.GetItem<AppState>($"{AppState.CurrentUser}_{nameof(AppState)}");
@@ -101,6 +81,8 @@ namespace AppBuilder.Client.Pages
         public void HandleOnOffLine(string status)
         {
             AppState.IsOnline = status == "online";
+            if (!AppState.IsOnline)
+                LocalStorage.SetItem($"{AppState.CurrentUser}_{nameof(AppState)}", AppState);
             
             Console.WriteLine($"network status changed to {status}");
         }

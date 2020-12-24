@@ -42,6 +42,7 @@ namespace AppBuilder.Client.Components
         {
             if (firstRender)
                 AppState.PropertyChanged += UpdateSnippet;
+            Console.WriteLine("Editor.razor renders");
             return base.OnAfterRenderAsync(firstRender);
         }
 

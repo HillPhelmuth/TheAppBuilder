@@ -1,16 +1,17 @@
 {
   "name": "App Builder",
   "short_name": "App Builder",
-  "description": "Build Blazor and c# Console apps online of off",
+  "description": "Build Blazor SPAs and c# Console apps online or off",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000a12",
+  "background_color": "#5300af",
+  "theme_color": "##870000",
   "icons": [
     {
       "src": "icons/folder_share-512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     },
     {
       "src": "icons/folder_share-256.png",

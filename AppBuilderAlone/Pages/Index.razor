@@ -1,24 +1,11 @@
 ﻿@page "/"
 @layout MainLayout
-<AuthorizeView>
-    <Authorized>
-        <div style="margin-right:1rem">
-            Hello, @context.User.Identity.Name!
-            <a href="/.auth/logout?post_logout_redirect_uri=/" style="color: darkred"> Log out</a>
-        </div>
-    </Authorized>
-    <NotAuthorized>
-        <div style="margin-right:1rem">
-            <a href="/login-providers" style="color: darkblue">Log in</a>
-        </div>
-    </NotAuthorized>
-</AuthorizeView>
-<MatTabGroup >
+
+<MatTabGroup>
     <MatTab Label="Home">
         <MatH2 Class="text-center">App Builder</MatH2>
         <UploadProject OnProjectUpload="HandleProjectUpload" />
         <MatButton Raised="true" OnClick="RecoverState">Recover State</MatButton>
-        @*<MatButton OnClick="TrySaveAssemblyRefsLocal">Try Cache</MatButton>*@
         <div class="mat-layout-grid">
             <div class="mat-layout-grid-inner">
                 <div class="mat-layout-grid-cell mat-layout-grid-cell-span-12">
@@ -45,23 +32,20 @@
             </div>
         </div>
     </MatTab>
-    <AuthorizeView>
-        <Authorized>
-            <MatTab Label="Console Project">
-                <ConsoleHome />
-            </MatTab>
-            <MatTab Label="Blazor/Razor Project">
-                <RazorCodeHome />
-            </MatTab>
-        </Authorized>
-        <NotAuthorized>
-            <MatTab Label="Login">
-                <LoginProvider/>
-            </MatTab>
-        </NotAuthorized>
-    </AuthorizeView>
-   
-   
+    <MatTab Label="Console Project">
+        <ConsoleHome />
+    </MatTab>
+    <MatTab Label="Blazor/Razor Project">
+        <RazorCodeHome />
+    </MatTab>
+    @if (!AppState.IsAuthUser)
+    {
+        <MatTab Label="Login">
+            <LoginProvider />
+        </MatTab>
+    }
+ 
+
 </MatTabGroup>
 
 

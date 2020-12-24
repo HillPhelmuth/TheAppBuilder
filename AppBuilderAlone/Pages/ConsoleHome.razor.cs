@@ -48,6 +48,7 @@ namespace AppBuilder.Client.Pages
             {
                 AppState.ActiveProjectFile ??= activeFile;
             }
+            Console.WriteLine("ConsoleHome Renders");
             await base.OnAfterRenderAsync(firstRender);
         }
         private void HandleCodeSubmit()

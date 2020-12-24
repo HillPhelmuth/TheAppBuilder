@@ -24,8 +24,14 @@ namespace AppBuilder.Shared
         private string _currentUser;
         private bool _isAuthUser;
         private List<string> _assemblyNames;
+        private string _themeColor;
 
-        //ToDo Add User-Auth for Azure Static Blazor, Set IsAuthUser and CurrentUser
+        public string ThemeColor
+        {
+            get => _themeColor;
+            set { _themeColor = value; OnPropertyChanged();}
+        }
+
         public string CurrentUser
         {
             get => _currentUser;

@@ -1,8 +1,10 @@
+@using System.ComponentModel
+@inject AppState AppState
 <MatThemeProvider Theme="theme">
     <Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@(new List<System.Reflection.Assembly> { typeof(AppBuilder.Output.__RazorOutput).Assembly })">
         <Found Context="routeData">
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)" />
-            @*<RouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)" />*@
+            @*<AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)" />*@
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)" />
         </Found>
         <NotFound>
             <LayoutView Layout="@typeof(DefaultLayout)">
@@ -12,10 +14,23 @@
     </Router>
 </MatThemeProvider>
 @code{
-    readonly MatTheme theme = new MatTheme()
+
+    protected override Task OnInitializedAsync()
     {
-        Primary = "#000a12",
-        Surface = "#263238",
-        Secondary = "#4f5b62",
+        AppState.PropertyChanged += HandlePropertyChange;
+        return base.OnInitializedAsync();
+    }
+
+    private MatTheme theme = new MatTheme()
+    {
+        Primary = "#870000",
+        Surface = "#030073",
+        Secondary = "#030073",
     };
+    private void HandlePropertyChange(object sender, PropertyChangedEventArgs args)
+    {
+        if (args.PropertyName != nameof(AppState.ThemeColor)) return;
+        theme.Primary = AppState.ThemeColor;
+        StateHasChanged();
+    }
 }

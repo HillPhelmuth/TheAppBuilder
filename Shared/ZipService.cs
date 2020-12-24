@@ -26,7 +26,7 @@ namespace AppBuilder.Shared
                 await using var fileStream = entry.Open();
                 var fileBytes = await fileStream.ReadFully();
                 var content = Encoding.UTF8.GetString(fileBytes);
-                entries.Add(new ProjectFile { Name = entry.FullName, Content = content, FileType = entry.FullName.EndsWith(".cs") ? FileType.Class : FileType.Razor });
+                entries.Add(new ProjectFile { Name = entry.FullName.GetFileNameOnly(), Content = content, FileType = entry.FullName.EndsWith(".cs") ? FileType.Class : FileType.Razor });
             }
             sw.Stop();
             Console.WriteLine($"ExtractFiles in {sw.ElapsedMilliseconds}");
@@ -83,6 +83,12 @@ namespace AppBuilder.Shared
             await using var ms = new MemoryStream();
             await input.CopyToAsync(ms);
             return ms.ToArray();
+        }
+
+        public static string GetFileNameOnly(this string path)
+        {
+            if (!path.Contains('/')) return path;
+            return path.Split('/').Reverse().FirstOrDefault(x => x.EndsWith(".cs") || x.EndsWith(".razor"));
         }
     }
 }

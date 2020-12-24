@@ -29,7 +29,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #000a12;
+    background-color: #870000;
     border-radius: 4px;
     box-shadow: inset 0 0 8px rgba(0,0,0,0.2);
     color: white;
@@ -40,7 +40,7 @@
 }
 
     .drag-drop-zone:hover {
-        background-color: #4f5b62;
+        background-color: #d50000;
     }
 
 ::deep.drag-drop-zone > input[type=file] {
