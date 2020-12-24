@@ -10,7 +10,7 @@ const cacheNamePrefix = 'offline-cache-';
 const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
 const offlineAssetsInclude = [ /\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.json$/, /\.css$/, /\.woff$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/, /\.blat$/, /\.dat$/ ];
 const offlineAssetsExclude = [ /^service-worker\.js$/, /^routes\.json$/ ];
-const noHashCheckInclude = [/^routes\.json$/];
+const noHashCheckInclude = [ /^routes\.json$/ ];
 async function onInstall(event) {
     console.info('Service worker: Install');
 
@@ -20,7 +20,7 @@ async function onInstall(event) {
         .filter(asset => !offlineAssetsExclude.some(pattern => pattern.test(asset.url)))
         .map(asset => new Request(asset.url, { integrity: asset.hash }));
     const noCheckRequests = self.assetsManifest.assets
-        .filter(asset => noHashCheckInclude.some(pattern.test(asset.url)))
+        .filter(asset => noHashCheckInclude.some(pattern => pattern.test(asset.url)))
         .map(asset => new Request(asset.url));
     await caches.open(cacheName).then(cache => cache.addAll(assetsRequests) && cache.addAll(noCheckRequests));
 }
