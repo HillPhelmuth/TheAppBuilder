@@ -89,7 +89,7 @@ namespace AppBuilder.Client.Pages
         private void HandleCodePropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             if (AppState.IsAuthUser) LocalStorage.SetItem(nameof(AppState), AppState);
-            if (args.PropertyName != "ProjectFiles" && args.PropertyName != "ActiveProject") return;
+            if (args.PropertyName != "ProjectFiles" && args.PropertyName != "ActiveProject" && args.PropertyName != "IsOnline") return;
             ExtractedFiles = AppState.ProjectFiles;
             StateHasChanged();
         }
