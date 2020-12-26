@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="wwwroot\routes.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="3.0.0" />
     <PackageReference Include="BlazorMonaco" Version="1.6.0" />
     <PackageReference Include="Faso.Blazor.SpinKit" Version="1.0.1" />

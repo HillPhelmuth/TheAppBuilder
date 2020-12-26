@@ -31,22 +31,30 @@
                                 </select>
                         </MatAppBarSection>
                         <MatAppBarSection Align="@MatAppBarSectionAlign.End">
-                            <CascadingAuthenticationState>
-                                <AuthorizeView>
-                                    <Authorized>
-                                        <div style="margin-right:1rem">
-                                            Hello, @context.User.Identity.Name!
-                                            <a href="/.auth/logout?post_logout_redirect_uri=/" style="color: white"> Log out</a>
-                                        </div>
-                                    </Authorized>
-                                    <NotAuthorized>
-                                        <div style="margin-right:1rem">
-                                            <a href="/login-providers" style="color: white">Log in</a>
-                                        </div>
-                                    </NotAuthorized>
-                                </AuthorizeView>
-                            </CascadingAuthenticationState>
-                            <MatIconButton Style="margin-left:5px" Link="https://github.com/HillPhelmuth/MasterCSharp" Target="_blank">
+                            @if (AppState.IsOnline)
+                            {
+                                <CascadingAuthenticationState>
+                                    <AuthorizeView>
+                                        <Authorized>
+                                            <div style="margin-right: 1rem">
+                                                Hello, @context.User.Identity.Name!
+                                                <a href="/.auth/logout?post_logout_redirect_uri=/" style="color: white"> Log out</a>
+                                            </div>
+                                        </Authorized>
+                                        <NotAuthorized>
+                                            <div style="margin-right: 1rem">
+                                                <a href="/login-providers" style="color: white">Log in</a>
+                                            </div>
+                                        </NotAuthorized>
+                                    </AuthorizeView>
+                                </CascadingAuthenticationState>
+                            }
+                            else
+                            {
+                                <p>Offline</p>
+                            }
+                            
+                            <MatIconButton Style="margin-left: 5px" Link="https://github.com/HillPhelmuth/MasterCSharp" Target="_blank">
                                 <i class="fa fa-github"></i>
                             </MatIconButton>
                         </MatAppBarSection>
