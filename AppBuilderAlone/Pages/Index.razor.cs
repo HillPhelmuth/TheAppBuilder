@@ -56,7 +56,7 @@ namespace AppBuilder.Client.Pages
             if (firstRender)
             {
                 await RazorCompile.InitAsync();
-                await CompileService.InitAsync();
+                //await CompileService.InitAsync();
                 IndexObject = DotNetObjectReference.Create(this);
                 AppState.IsOnline = await RazorInterop.CheckOnlineStatus();
                 await RazorInterop.TrackOnlineStatus(IndexObject);
@@ -89,7 +89,7 @@ namespace AppBuilder.Client.Pages
         private void HandleCodePropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             if (AppState.IsAuthUser) LocalStorage.SetItem(nameof(AppState), AppState);
-            if (args.PropertyName != "ProjectFiles" && args.PropertyName != "ActiveProject") return;
+            if (args.PropertyName != "ProjectFiles" && args.PropertyName != "ActiveProject" && args.PropertyName != "IsOnline") return;
             ExtractedFiles = AppState.ProjectFiles;
             StateHasChanged();
         }

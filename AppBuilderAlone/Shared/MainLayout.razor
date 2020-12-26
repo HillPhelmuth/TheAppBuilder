@@ -1,59 +1,59 @@
 ﻿@inherits LayoutComponentBase
-@inject AppState AppState 
-    <ModalDialogContainer />
+@inject AppState AppState
+<ModalDialogContainer />
 <div class="page">
     <div class="main">
-       
-            <MatAppBarContainer>
-                <MatAppBar Class="mat-elevation-z12" Fixed="true" Style="position:sticky">
-                    <MatAppBarRow>
-                        <MatAppBarSection>
-                            <MatAppBarTitle Style="font-size:1.4em">App Builder - Build c# Console and Blazor Apps</MatAppBarTitle>
-                        </MatAppBarSection>
-                        <MatAppBarSection>
-                            Theme:
-                                <select style="background-color: white" @onchange="ChangeTheme">
-                                    <option value="">Choose Theme</option>
-                                    <option value="#a9a9a9" style="background-color: #a9a9a9"></option>
-                                    <option value="#004f00" style="background-color: #004f00"></option>
-                                    <option value="#002600" style="background-color: #002600"></option>
-                                    <option value="#480007" style="background-color: #480007"></option>
-                                    <option value="#7a0c30" style="background-color: #7a0c30"></option>
-                                    <option value="#00004d" style="background-color: #00004d"></option>
-                                    <option value="#0a007a" style="background-color: #0a007a"></option>
-                                    <option value="#870000" style="background-color: #870000"></option>
-                                    <option value="#bf2600" style="background-color: #bf2600"></option>
-                                    <option value="#00008b" style="background-color: #00008b"></option>
-                                    <option value="#8b0000" style="background-color: #8b0000"></option>
-                                    <option value="#e9967a" style="background-color: #e9967a"></option>
-                                    <option value="#ff0000" style="background-color: #ff0000"></option>
-                                    <option value="#000000" style="background-color: #000000"></option>
-                                </select>
-                        </MatAppBarSection>
-                        <MatAppBarSection Align="@MatAppBarSectionAlign.End">
-                            <CascadingAuthenticationState>
-                                <AuthorizeView>
-                                    <Authorized>
-                                        <div style="margin-right:1rem">
-                                            Hello, @context.User.Identity.Name!
-                                            <a href="/.auth/logout?post_logout_redirect_uri=/" style="color: white"> Log out</a>
-                                        </div>
-                                    </Authorized>
-                                    <NotAuthorized>
-                                        <div style="margin-right:1rem">
-                                            <a href="/login-providers" style="color: white">Log in</a>
-                                        </div>
-                                    </NotAuthorized>
-                                </AuthorizeView>
-                            </CascadingAuthenticationState>
-                            <MatIconButton Style="margin-left:5px" Link="https://github.com/HillPhelmuth/MasterCSharp" Target="_blank">
-                                <i class="fa fa-github"></i>
-                            </MatIconButton>
-                        </MatAppBarSection>
-                    </MatAppBarRow>
-                </MatAppBar>
-            </MatAppBarContainer>
-       
+
+        <MatAppBarContainer>
+            <MatAppBar Class="mat-elevation-z12" Fixed="true" Style="position:sticky">
+                <MatAppBarRow>
+                    <MatAppBarSection>
+                        <MatAppBarTitle Style="font-size:1.4em">App Builder - Build c# Console and Blazor Apps</MatAppBarTitle>
+                    </MatAppBarSection>
+                    <MatAppBarSection>
+                        Theme:
+                        <select style="background-color: white" @onchange="ChangeTheme">
+                            <option value="">Choose Theme</option>
+                            <option value="#a9a9a9" style="background-color: #a9a9a9"></option>
+                            <option value="#004f00" style="background-color: #004f00"></option>
+                            <option value="#002600" style="background-color: #002600"></option>
+                            <option value="#480007" style="background-color: #480007"></option>
+                            <option value="#7a0c30" style="background-color: #7a0c30"></option>
+                            <option value="#00004d" style="background-color: #00004d"></option>
+                            <option value="#0a007a" style="background-color: #0a007a"></option>
+                            <option value="#870000" style="background-color: #870000"></option>
+                            <option value="#bf2600" style="background-color: #bf2600"></option>
+                            <option value="#00008b" style="background-color: #00008b"></option>
+                            <option value="#8b0000" style="background-color: #8b0000"></option>
+                            <option value="#e9967a" style="background-color: #e9967a"></option>
+                            <option value="#ff0000" style="background-color: #ff0000"></option>
+                            <option value="#000000" style="background-color: #000000"></option>
+                        </select>
+                    </MatAppBarSection>
+                    <MatAppBarSection Align="@MatAppBarSectionAlign.End">
+                        <CascadingAuthenticationState>
+                            <AuthorizeView>
+                                <Authorized>
+                                    <div style="margin-right: 1rem">
+                                        Hello, @context.User.Identity.Name!
+                                        <a href="/.auth/logout?post_logout_redirect_uri=/" style="color: white"> Log out</a>
+                                    </div>
+                                </Authorized>
+                                <NotAuthorized>
+                                    <div style="margin-right: 1rem">
+                                        <a href="/login-providers" style="color: white">Log in</a>
+                                    </div>
+                                </NotAuthorized>
+                            </AuthorizeView>
+                        </CascadingAuthenticationState>
+                        <MatIconButton Style="margin-left: 5px" Link="https://github.com/HillPhelmuth/MasterCSharp" Target="_blank">
+                            <i class="fa fa-github"></i>
+                        </MatIconButton>
+                    </MatAppBarSection>
+                </MatAppBarRow>
+            </MatAppBar>
+        </MatAppBarContainer>
+
         <div class="content px-4">
             @Body
         </div>

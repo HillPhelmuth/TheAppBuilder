@@ -40,8 +40,10 @@
         <MatButton Raised="true" OnClick="SelectActiveFile">Modify/Delete Project File</MatButton>
     </MatListItem>
     <MatDivider></MatDivider>
-    <MatListItem>
-        <MatButton Raised="true" OnClick="UpdateFromPublicRepo">Load Content From Public Repo</MatButton>
-    </MatListItem>
-    
+    @if (AppState.IsOnline)
+    {
+        <MatListItem>
+            <MatButton Raised="true" OnClick="UpdateFromPublicRepo">Load Content From Public Repo</MatButton>
+        </MatListItem>
+    }
 </MatList>

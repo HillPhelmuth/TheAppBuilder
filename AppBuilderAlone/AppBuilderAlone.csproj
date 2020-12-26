@@ -6,13 +6,6 @@
     <PublishTrimmed>false</PublishTrimmed>
     <RootNamespace>AppBuilder.Client</RootNamespace>
   </PropertyGroup>
-  
-  
-  <ItemGroup>
-    <None Include="Components\RazorProject\CodeFileModal.razor" />
-    <None Include="Components\RazorProject\DefaultOutput.razor" />
-    <None Include="Components\RazorProject\RazorSamplesModal.razor" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="3.0.0" />

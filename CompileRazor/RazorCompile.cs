@@ -10,6 +10,7 @@ using System.Net.Http.Json;
 using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 using AppBuilder.Shared;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Razor.Language;
@@ -33,7 +34,7 @@ namespace AppBuilder.CompileRazor
         }
         private static CSharpCompilation _baseCompilation;
         private IEnumerable<MetadataReference> _references;
-
+        public bool IsSuccess { get; set; }
         public const string DefaultRootNamespace = "AppBuilder.Output";
 
         private const string WorkingDirectory = "/BlazorOut/";
@@ -128,6 +129,7 @@ namespace AppBuilder.CompileRazor
             if (cSharpResults.Any(r => r.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error)))
             {
                 Console.WriteLine($"Razor compile error in GetCodeAssebly: {string.Join("\r\n", cSharpResults.SelectMany(r => r.Diagnostics).ToList())}");
+                IsSuccess = false;
                 return new CodeAssemblyModel { Diagnostics = cSharpResults.SelectMany(r => r.Diagnostics).ToList() };
             }
 
@@ -153,10 +155,11 @@ namespace AppBuilder.CompileRazor
                 finalCompilation.Emit(peStream);
 
                 result.AssemblyBytes = peStream.ToArray();
-
+                IsSuccess = true;
                 return result;
             }
 
+            IsSuccess = false;
             return result;
         }
         public RazorProjectEngine CreateRazorProjectEngine(IReadOnlyList<MetadataReference> references)

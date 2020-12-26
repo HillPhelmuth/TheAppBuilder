@@ -1,6 +1,9 @@
 ﻿@page "/"
 @layout MainLayout
-
+@if (!AppState.IsOnline)
+{
+    <MatH3>You are currently offline</MatH3>
+}
 <MatTabGroup>
     <MatTab Label="Home">
         <MatH2 Class="text-center">App Builder</MatH2>
