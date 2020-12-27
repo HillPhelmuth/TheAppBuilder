@@ -84,13 +84,10 @@ namespace AppBuilder.Client.Components
 
         protected async Task EditorOnDidInit(MonacoEditorBase editor)
         {
-            await MonacoEditor.AddCommand((int)KeyMode.CtrlCmd | (int)KeyCode.KEY_H, (mEdit, keyCode) =>
+
+            await MonacoEditor.AddAction("saveAction", "Save Snippet", new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_D, (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_S }, null, null, "navigation", 1.5, async (mEdit, keyCodes) =>
             {
-                Console.WriteLine("Ctrl+H : Initial editor command is triggered.");
-            });
-            await MonacoEditor.AddAction("saveAction", "Save Snippet", new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_D, (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_S }, null, null, "navigation", 1.5, async (mEdit,keyCodes) =>
-            {
-                
+                await SaveCode();
                 Console.WriteLine("Ctrl+D : Editor action is triggered.");
             });
             await MonacoEditor.AddAction("executeAction", "Execute (ctrl + enter)",
@@ -101,27 +98,11 @@ namespace AppBuilder.Client.Components
                     Console.WriteLine("Code Executed from Editor Command");
                 });
             await MonacoEditor.AddAction("copyAction", "Copy to clipboard (ctrl + c)",
-                new[] {(int) KeyMode.CtrlCmd | (int) KeyCode.KEY_D}, null, null, "navigation", 3.5,
+                new[] { (int)KeyMode.CtrlCmd | (int)KeyCode.KEY_D }, null, null, "navigation", 3.5,
                 async (mEdit, keyCodes) => await CopyToClipboard());
             await MonacoEditor.SetValue(AppState.CodeSnippet);
-            //var newDecorations = new[]
-            //{
-            //    new ModelDeltaDecoration
-            //    {
-            //        Range = new BlazorMonaco.Bridge.Range(3,1,3,1),
-            //        Options = new ModelDecorationOptions
-            //        {
-            //            IsWholeLine = false,
-            //            ClassName = "decorationContentClass",
-            //            GlyphMarginClassName = "decorationGlyphMarginClass"
-            //        }
-            //    }
-            //};
 
-            //decorationIds = await MonacoEditor.DeltaDecorations(null, newDecorations);
         }
-        private string[] decorationIds;
-
         protected void OnContextMenu(EditorMouseEvent eventArg)
         {
             Console.WriteLine("OnContextMenu : " + System.Text.Json.JsonSerializer.Serialize(eventArg));
