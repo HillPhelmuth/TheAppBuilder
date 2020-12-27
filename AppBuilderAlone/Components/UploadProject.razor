@@ -1,34 +1,34 @@
 ﻿@inject ZipService ZipService
 @inject AppState AppState
-    <div class="drag-drop-zone mat-elevation-z12" style="background-color:@(AppState.ThemeColor ?? "#87000")">
-        <label for="getfile"> <MatH6>Upload Project Zip</MatH6></label>
-        <InputFile AdditionalAttributes="attributes" OnChange="OnInputFileChange" accept=".zip" />
-    </div>
+<div class="drag-drop-zone mat-elevation-z12" style="background-color: @(AppState.ThemeColor ?? "#87000")">
+    <MatH6>Upload Project Zip</MatH6>
+    <InputFile OnChange="OnInputFileChange" accept=".zip" />
+</div>
 
-    @code {
+@code {
 
-        [Parameter]
-        public EventCallback<List<ProjectFile>> OnProjectFileUpload { get; set; }
-        [Parameter]
-        public EventCallback<UserProject> OnProjectUpload { get; set; }
+    [Parameter]
+    public EventCallback<List<ProjectFile>> OnProjectFileUpload { get; set; }
+    [Parameter]
+    public EventCallback<UserProject> OnProjectUpload { get; set; }
 
-        private Dictionary<string, object> attributes = new() {{"id", "getfile"}};
-        private async Task OnInputFileChange(InputFileChangeEventArgs e)
-        {
-            var projectName = e.File.Name;
-            var bufferSize = 50 * 1024 * 1024;
-            await using var stream = e.File.OpenReadStream(bufferSize);
-            var projectFiles = await ZipService.ExtractFiles(stream);
-            var project = new UserProject {Name = projectName.Replace(".zip", string.Empty), Files = projectFiles};
-            await OnProjectFileUpload.InvokeAsync(projectFiles);
-            await OnProjectUpload.InvokeAsync(project);
-        }
 
-        protected override Task OnAfterRenderAsync(bool firstRender)
-        {
-            if (!firstRender)
-                Console.WriteLine("UploadProject.razor renders");
-            return base.OnAfterRenderAsync(firstRender);
-        }
-
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        var projectName = e.File.Name;
+        var bufferSize = 50 * 1024 * 1024;
+        await using var stream = e.File.OpenReadStream(bufferSize);
+        var projectFiles = await ZipService.ExtractFiles(stream);
+        var project = new UserProject { Name = projectName.Replace(".zip", string.Empty), Files = projectFiles };
+        await OnProjectFileUpload.InvokeAsync(projectFiles);
+        await OnProjectUpload.InvokeAsync(project);
     }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            Console.WriteLine("UploadProject.razor renders");
+        return base.OnAfterRenderAsync(firstRender);
+    }
+
+}
