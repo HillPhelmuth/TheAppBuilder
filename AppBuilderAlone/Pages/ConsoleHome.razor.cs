@@ -29,8 +29,8 @@ namespace AppBuilder.Client.Pages
         private ProjectFile activeFile;
         private string fileName;
         private bool isCodeCompiling;
-        private string ReadlinePattern { get; } = "Console.ReadLine()";
-        
+        private string readlinePattern = "Console.ReadLine()";
+
         protected override async Task OnInitializedAsync()
         {
             await CompileService.InitAsync();
@@ -75,6 +75,10 @@ namespace AppBuilder.Client.Pages
                 tempFiles.Add(new ProjectFile{Name = file.Name, Content = await ReplaceConsoleInput(file.Content)});
             }
             await Task.Delay(20);
+            foreach (var file in tempFiles)
+            {
+                Console.WriteLine($"Submitting {file.Name}\r\n{file.Content}");
+            }
             AppState.CurrentOutput = await CompileService.CompileAndRun(tempFiles.ToArray());
             isCodeCompiling = false;
             await InvokeAsync(StateHasChanged);
@@ -96,17 +100,18 @@ namespace AppBuilder.Client.Pages
         }
         private async Task<string> ReplaceConsoleInput(string codeInput)
         {
+            if (!codeInput.Contains(readlinePattern)) return codeInput;
             var tempCode = codeInput;
             var inputDictionary = new Dictionary<int, DataInputFormStringField>();
-            var readLineIndexes = tempCode.AllIndexesOf(ReadlinePattern);
-            var regex = new Regex(Regex.Escape(ReadlinePattern));
+            var readLineIndexes = tempCode.AllIndexesOf(readlinePattern);
+            var regex = new Regex(Regex.Escape(readlinePattern));
             var inputForm = new ModalDataInputForm("User Inputs", "User console input");
 
             for (int i = 1; i <= readLineIndexes.Count; i++)
             {
                 string userInput = "";
                 var inputField1 =
-                    inputForm.AddStringField($"Input{i}", $"{ReadlinePattern} {i}", userInput, "The user's input.");
+                    inputForm.AddStringField($"Input{i}", $"{readlinePattern} {i}", userInput, "The user's input.");
                 inputDictionary.Add(i, inputField1);
             }
 
@@ -138,7 +143,7 @@ namespace AppBuilder.Client.Pages
             AppState.PropertyChanged -= HandleCodePropertyChanged;
         }
     }
-    public static class StringExtension
+    public static class ExtensionMethods
     {
         public static List<int> AllIndexesOf(this string str, string value)
         {
