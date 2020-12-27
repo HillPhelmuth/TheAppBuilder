@@ -4,11 +4,11 @@
   "description": "Build Blazor SPAs and c# Console apps online or off",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#5300af",
+  "background_color": "#870000",
   "theme_color": "#000000",
   "icons": [
     {
-      "src": "icons/folder_share-512.png",
+      "src": "icons/appbuilder-icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
@@ -19,9 +19,188 @@
       "sizes": "256x256"
     },
     {
-      "src": "icons/android/android-launchericon-512-512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "src": "icons/windows10/Square71x71Logo.scale-400.png",
+      "sizes": "284x284"
+    },
+    {
+      "src": "icons/windows10/Square71x71Logo.scale-200.png",
+      "sizes": "142x142"
+    },
+    {
+      "src": "icons/windows10/Square71x71Logo.scale-100.png",
+      "sizes": "71x71"
+    },
+    {
+      "src": "icons/windows10/Square71x71Logo.scale-150.png",
+      "sizes": "107x107"
+    },
+    {
+      "src": "icons/windows10/Square71x71Logo.scale-125.png",
+      "sizes": "89x89"
+    },
+    {
+      "src": "icons/windows10/Square150x150Logo.scale-400.png",
+      "sizes": "600x600"
+    },
+    {
+      "src": "icons/windows10/Square150x150Logo.scale-200.png",
+      "sizes": "300x300"
+    },
+    {
+      "src": "icons/windows10/Square150x150Logo.scale-100.png",
+      "sizes": "150x150"
+    },
+    {
+      "src": "icons/windows10/Square150x150Logo.scale-150.png",
+      "sizes": "225x225"
+    },
+    {
+      "src": "icons/windows10/Square150x150Logo.scale-125.png",
+      "sizes": "188x188"
+    },
+    {
+      "src": "icons/windows10/Wide310x150Logo.scale-400.png",
+      "sizes": "1240x600"
+    },
+    {
+      "src": "icons/windows10/Wide310x150Logo.scale-200.png",
+      "sizes": "620x300"
+    },
+    {
+      "src": "icons/windows10/Wide310x150Logo.scale-100.png",
+      "sizes": "310x150"
+    },
+    {
+      "src": "icons/windows10/Wide310x150Logo.scale-150.png",
+      "sizes": "465x225"
+    },
+    {
+      "src": "icons/windows10/Wide310x150Logo.scale-125.png",
+      "sizes": "388x188"
+    },
+    {
+      "src": "icons/windows10/Square310x310Logo.scale-400.png",
+      "sizes": "1240x1240"
+    },
+    {
+      "src": "icons/windows10/Square310x310Logo.scale-200.png",
+      "sizes": "620x620"
+    },
+    {
+      "src": "icons/windows10/Square310x310Logo.scale-100.png",
+      "sizes": "310x310"
+    },
+    {
+      "src": "icons/windows10/Square310x310Logo.scale-150.png",
+      "sizes": "465x465"
+    },
+    {
+      "src": "icons/windows10/Square310x310Logo.scale-125.png",
+      "sizes": "388x388"
+    },
+    {
+      "src": "icons/windows10/Square44x44Logo.scale-400.png",
+      "sizes": "176x176"
+    },
+    {
+      "src": "icons/windows10/Square44x44Logo.scale-200.png",
+      "sizes": "88x88"
+    },
+    {
+      "src": "icons/windows10/Square44x44Logo.scale-100.png",
+      "sizes": "44x44"
+    },
+    {
+      "src": "icons/windows10/Square44x44Logo.scale-150.png",
+      "sizes": "66x66"
+    },
+    {
+      "src": "icons/windows10/Square44x44Logo.scale-125.png",
+      "sizes": "55x55"
+    },
+    {
+      "src": "icons/windows10/Square44x44Logo.targetsize-256.png",
+      "sizes": "256x256"
+    },
+    {
+      "src": "icons/windows10/Square44x44Logo.targetsize-48.png",
+      "sizes": "48x48"
+    },
+    {
+      "src": "icons/windows10/Square44x44Logo.targetsize-32.png",
+      "sizes": "32x32"
+    },
+    {
+      "src": "icons/windows10/Square44x44Logo.targetsize-24.png",
+      "sizes": "24x24"
+    },
+    {
+      "src": "icons/windows10/Square44x44Logo.targetsize-16.png",
+      "sizes": "16x16"
+    },
+    {
+      "src": "icons/windows10/Square44x44Logo.targetsize-256_altform-unplated.png",
+      "sizes": "256x256"
+    },
+    {
+      "src": "icons/windows10/Square44x44Logo.targetsize-48_altform-unplated.png",
+      "sizes": "48x48"
+    },
+    {
+      "src": "icons/windows10/Square44x44Logo.targetsize-32_altform-unplated.png",
+      "sizes": "32x32"
+    },
+    {
+      "src": "icons/windows10/Square44x44Logo.targetsize-24_altform-unplated.png",
+      "sizes": "24x24"
+    },
+    {
+      "src": "icons/windows10/Square44x44Logo.targetsize-16_altform-unplated.png",
+      "sizes": "16x16"
+    },
+    {
+      "src": "icons/windows10/StoreLogo.scale-400.png",
+      "sizes": "200x200"
+    },
+    {
+      "src": "icons/windows10/StoreLogo.scale-200.png",
+      "sizes": "100x100"
+    },
+    {
+      "src": "icons/windows10/StoreLogo.scale-150.png",
+      "sizes": "75x75"
+    },
+    {
+      "src": "icons/windows10/StoreLogo.scale-125.png",
+      "sizes": "63x63"
+    },
+    {
+      "src": "icons/windows10/StoreLogo.scale-100.png",
+      "sizes": "50x50"
+    },
+    {
+      "src": "icons/windows10/StoreLogo.png",
+      "sizes": "50x50"
+    },
+    {
+      "src": "icons/windows10/SplashScreen.scale-400.png",
+      "sizes": "2480x1200"
+    },
+    {
+      "src": "icons/windows10/SplashScreen.scale-200.png",
+      "sizes": "1240x600"
+    },
+    {
+      "src": "icons/windows10/SplashScreen.scale-150.png",
+      "sizes": "930x450"
+    },
+    {
+      "src": "icons/windows10/SplashScreen.scale-125.png",
+      "sizes": "775x375"
+    },
+    {
+      "src": "icons/windows10/SplashScreen.scale-100.png",
+      "sizes": "620x300"
     },
     {
       "src": "icons/android/android-launchericon-512-512.png",
@@ -30,10 +209,6 @@
     {
       "src": "icons/android/android-launchericon-192-192.png",
       "sizes": "192x192"
-    },
-    {
-      "src": "icons/android/android-launchericon-144-144.png",
-      "sizes": "144x144"
     },
     {
       "src": "icons/android/android-launchericon-96-96.png",
@@ -58,42 +233,6 @@
     {
       "src": "icons/chrome/chrome-installprocess-128-128.png",
       "sizes": "128x128"
-    },
-    {
-      "src": "icons/firefox/firefox-marketplace-512-512.png",
-      "sizes": "512x512"
-    },
-    {
-      "src": "icons/firefox/firefox-marketplace-128-128.png",
-      "sizes": "128x128"
-    },
-    {
-      "src": "icons/firefox/firefox-general-256-256.png",
-      "sizes": "256x256"
-    },
-    {
-      "src": "icons/firefox/firefox-general-128-128.png",
-      "sizes": "128x128"
-    },
-    {
-      "src": "icons/firefox/firefox-general-90-90.png",
-      "sizes": "90x90"
-    },
-    {
-      "src": "icons/firefox/firefox-general-64-64.png",
-      "sizes": "64x64"
-    },
-    {
-      "src": "icons/firefox/firefox-general-48-48.png",
-      "sizes": "48x48"
-    },
-    {
-      "src": "icons/firefox/firefox-general-32-32.png",
-      "sizes": "32x32"
-    },
-    {
-      "src": "icons/firefox/firefox-general-16-16.png",
-      "sizes": "16x16"
     }
   ]
 }
