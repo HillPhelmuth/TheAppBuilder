@@ -1,0 +1,9 @@
+﻿.fullscreen-output {
+    margin-left: 5%;
+    margin-right: 5%;
+    height: 90vh;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: scroll;
+    overflow-x: auto
+}

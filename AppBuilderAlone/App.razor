@@ -1,7 +1,7 @@
 @using System.ComponentModel
 @inject AppState AppState
 <MatThemeProvider Theme="theme">
-    <Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@(new List<System.Reflection.Assembly> { typeof(AppBuilder.Output.__RazorOutput).Assembly })">
+    <Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@(new List<System.Reflection.Assembly> { typeof(Output.__RazorOutput).Assembly })">
         <Found Context="routeData">
             @*<AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)" />*@
             <RouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)" />

@@ -11,8 +11,8 @@
                         <MatAppBarTitle Style="font-size:1.4em">App Builder - Build c# Console and Blazor Apps</MatAppBarTitle>
                     </MatAppBarSection>
                     <MatAppBarSection>
-                        Theme:
-                        <select style="background-color: white" @onchange="ChangeTheme">
+                        <label for="themes"> Theme:</label>
+                        <select id="themes" style="background-color: white" @onchange="ChangeTheme">
                             <option value="">Choose Theme</option>
                             <option value="#a9a9a9" style="background-color: #a9a9a9"></option>
                             <option value="#004f00" style="background-color: #004f00"></option>
@@ -46,7 +46,7 @@
                                 </NotAuthorized>
                             </AuthorizeView>
                         </CascadingAuthenticationState>
-                        <MatIconButton Style="margin-left: 5px" Link="https://github.com/HillPhelmuth/MasterCSharp" Target="_blank">
+                        <MatIconButton Attributes="attributes" Style="margin-left: 5px" Link="https://github.com/HillPhelmuth/MasterCSharp" Target="_blank">
                             <i class="fa fa-github"></i>
                         </MatIconButton>
                     </MatAppBarSection>
@@ -61,6 +61,7 @@
 </div>
 @code
 {
+    private Dictionary<string,object> attributes = new() {{"aria-label","github link"}};
     private async Task ChangeTheme(ChangeEventArgs e)
     {
         Console.WriteLine($"setting app theme to: {e.Value}");
